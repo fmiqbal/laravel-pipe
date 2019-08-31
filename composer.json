@@ -1,0 +1,11 @@
+{
+    "name": "fikrimi/pipe",
+    "description": "CI/CD for Laravel",
+    "authors": [
+        {
+            "name": "Fikri Muhammad Iqbal",
+            "email": "fikri.miqbal23@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
