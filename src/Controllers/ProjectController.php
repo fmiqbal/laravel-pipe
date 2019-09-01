@@ -3,7 +3,6 @@
 namespace Fikrimi\Pipe\Controllers;
 
 use App\Http\Controllers\Controller;
-use Fikrimi\Pipe\Enum\Provider;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 
@@ -32,18 +31,23 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param \Fikrimi\Pipe\Models\Project $project
+     * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request, Project $project)
     {
-        //
+        $project
+            ->fill($request->all())
+            ->save();
+
+        return redirect()->route('pipe.projects.index');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Project  $project
+     * @param \App\Project $project
      * @return \Illuminate\Http\Response
      */
     public function show(Project $project)
@@ -54,7 +58,7 @@ class ProjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Project  $project
+     * @param \App\Project $project
      * @return \Illuminate\Http\Response
      */
     public function edit(Project $project)
@@ -65,8 +69,8 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Project  $project
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Project $project
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Project $project)
@@ -77,11 +81,14 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Project  $project
+     * @param \Fikrimi\Pipe\Models\Project $project
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy(Project $project)
     {
-        //
+        $project->delete();
+
+        return redirect()->back();
     }
 }

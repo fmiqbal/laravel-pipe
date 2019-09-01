@@ -18,6 +18,7 @@ class CreateProjectsTable extends Migration
             $table->string('name');
             $table->unsignedBigInteger('credential_id');
             $table->smallInteger('provider');
+            $table->text('namespace');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
 
