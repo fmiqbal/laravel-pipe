@@ -40,6 +40,7 @@ class RouteRegistrar
             ]);
 
             $router->resource('projects', 'ProjectController');
+            $router->resource('credentials', 'CredentialController');
         });
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Fikrimi\Pipe\Facades\Models;
+namespace Fikrimi\Pipe\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

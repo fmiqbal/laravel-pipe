@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateProjectsTable extends Migration
+class CreateCredentialsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,14 @@ class CreateProjectsTable extends Migration
      */
     public function up()
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('credentials', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->unsignedBigInteger('credential_id');
+            $table->string('username');
             $table->smallInteger('provider');
+            $table->smallInteger('type');
+            $table->text('auth');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
-
-            $table->foreign('credential_id')->references('id')
-                ->on('credentials')
-                ->onUpdate('CASCADE')
-                ->onDelete('CASCADE');
         });
     }
 
@@ -35,6 +31,6 @@ class CreateProjectsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('credentials');
     }
 }

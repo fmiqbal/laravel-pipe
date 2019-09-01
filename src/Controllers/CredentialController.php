@@ -3,11 +3,11 @@
 namespace Fikrimi\Pipe\Controllers;
 
 use App\Http\Controllers\Controller;
-use Fikrimi\Pipe\Enum\Provider;
+use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 
-class ProjectController extends Controller
+class CredentialController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +16,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return view('pipe::projects.index');
+        return view('pipe::credentials.index');
     }
 
     /**
@@ -26,24 +26,29 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('pipe::projects.create');
+        return view('pipe::credentials.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param \Fikrimi\Pipe\Models\Credential $credential
+     * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request, Credential $credential)
     {
-        //
+        $credential
+            ->fill($request->all())
+            ->save();
+
+        return redirect()->route('pipe.credentials.index');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Project  $project
+     * @param \App\Project $project
      * @return \Illuminate\Http\Response
      */
     public function show(Project $project)
@@ -54,7 +59,7 @@ class ProjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Project  $project
+     * @param \App\Project $project
      * @return \Illuminate\Http\Response
      */
     public function edit(Project $project)
@@ -65,8 +70,8 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Project  $project
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Project $project
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Project $project)
@@ -77,11 +82,14 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Project  $project
-     * @return \Illuminate\Http\Response
+     * @param \Fikrimi\Pipe\Models\Credential $credential
+     * @return void
+     * @throws \Exception
      */
-    public function destroy(Project $project)
+    public function destroy(Credential $credential)
     {
-        //
+        $credential->delete();
+
+        return redirect()->back();
     }
 }
