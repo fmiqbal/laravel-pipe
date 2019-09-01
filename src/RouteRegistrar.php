@@ -31,11 +31,15 @@ class RouteRegistrar
      */
     public function all()
     {
-        $this->router->group([], function ($router) {
+        $this->router->group([
+            'as' => 'pipe.'
+        ], function (Router $router) {
             $router->get('/', [
-                'uses' => 'PipeController@index',
-                'as' => 'pipe.index',
+                'uses' => 'DashboardController@index',
+                'as' => 'dashboard.index',
             ]);
+
+            $router->resource('projects', 'ProjectController');
         });
     }
 }
