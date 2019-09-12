@@ -33,6 +33,8 @@ class RouteRegistrar
     {
         $this->router->group([
             'as' => 'pipe.',
+            'prefix'    => 'pipe',
+            'namespace' => '\Fikrimi\Pipe\Controllers',
         ], function (Router $router) {
             $router->get('/', [
                 'uses' => 'DashboardController@index',
@@ -41,6 +43,14 @@ class RouteRegistrar
 
             $router->resource('projects', 'ProjectController');
             $router->resource('credentials', 'CredentialController');
+            $router->post('projects/{project}/build', [
+                'uses' => 'BuildController@build',
+                'as'   => 'projects.builds.build',
+            ]);
+            $router->post('webhook/{project}', [
+                'uses' => 'BuildController@build',
+                'as'   => 'projects.builds.webhook',
+            ]);
         });
     }
 }

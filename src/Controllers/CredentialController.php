@@ -48,7 +48,7 @@ class CredentialController extends Controller
                 'username'    => $request->get('username'),
                 'type'        => $request->get('type'),
                 'auth'        => Crypt::encrypt($request->get('auth')),
-                'fingerprint' => $key->getPublicKeyFingerprint('sha256'),
+                'fingerprint' => $key->getPublicKeyFingerprint(),
             ])
             ->save();
 

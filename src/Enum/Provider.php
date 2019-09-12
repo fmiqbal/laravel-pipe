@@ -10,9 +10,17 @@ class Provider extends Enum
     public const BITBUCKET = 3;
 
     public static $names = [
-        self::SSH       => 'GitLab',
+        self::SSH       => 'SSH',
         self::GITLAB    => 'GitLab',
         self::GITHUB    => 'GitHub',
         self::BITBUCKET => 'BitBucket',
     ];
+
+    public static function getRepositories()
+    {
+        $repo = self::$names;
+        unset($repo[self::SSH]);
+
+        return $repo;
+    }
 }

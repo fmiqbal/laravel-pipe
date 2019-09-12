@@ -5,6 +5,7 @@ namespace Fikrimi\Pipe\Controllers;
 use App\Http\Controllers\Controller;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
+use Str;
 
 class ProjectController extends Controller
 {
@@ -39,6 +40,9 @@ class ProjectController extends Controller
     {
         $project
             ->fill($request->all())
+            ->fill([
+                'id' => Str::orderedUuid()
+            ])
             ->save();
 
         return redirect()->route('pipe.projects.index');

@@ -18,9 +18,4 @@ class Credential extends Model
     ];
 
     protected $guarded = [];
-
-    public function getNameAttribute()
-    {
-        return $this->username . '@' . Provider::$names[$this->provider];
-    }
 }

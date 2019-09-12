@@ -13,13 +13,6 @@ class Pipe
             $router->all();
         };
 
-        $defaultOptions = [
-            'prefix'    => 'pipe',
-            'namespace' => '\Fikrimi\Pipe\Controllers',
-        ];
-
-        $options = array_merge($defaultOptions, $options);
-
         Route::group($options, function (Router $router) use ($callback) {
             $callback(new RouteRegistrar($router));
         });

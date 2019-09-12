@@ -21,6 +21,7 @@
                         <th>#</th>
                         <th>Username</th>
                         <th>Type</th>
+                        <th>Fingerprint</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -30,7 +31,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $credential->username }}</td>
                             <td>{{ \Fikrimi\Pipe\Models\Credential::$typeNames[$credential->type] }}</td>
-                            <td>{{ $credential->fingerprint }}</td>
+                            <td>{{ strtoupper($credential->fingerprint) }}</td>
                             <td>
                                 <button type="submit" form="form-delete" formaction="{{ route('pipe.credentials.destroy', $credential) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                             </td>
