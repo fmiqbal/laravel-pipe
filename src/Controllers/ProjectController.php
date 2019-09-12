@@ -39,9 +39,15 @@ class ProjectController extends Controller
     public function store(Request $request, Project $project)
     {
         $project
-            ->fill($request->all())
             ->fill([
-                'id' => Str::orderedUuid()
+                'provider'      => $request->get('provider'),
+                'name'          => $request->get('name'),
+                'namespace'     => $request->get('namespace'),
+                'dir_deploy'    => $request->get('dir_deploy'),
+                'dir_workspace' => $request->get('dir_workspace'),
+                'host'          => $request->get('host'),
+                'credential_id' => $request->get('credential_id'),
+                'id'            => Str::orderedUuid(),
             ])
             ->save();
 
@@ -57,7 +63,7 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         return view('pipe::projects.show')->with([
-            'project' => $project
+            'project' => $project,
         ]);
     }
 
