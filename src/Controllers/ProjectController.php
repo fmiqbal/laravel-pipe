@@ -47,12 +47,14 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Project $project
+     * @param \Fikrimi\Pipe\Models\Project $project
      * @return \Illuminate\Http\Response
      */
     public function show(Project $project)
     {
-        //
+        return view('pipe::projects.show')->with([
+            'project' => $project
+        ]);
     }
 
     /**

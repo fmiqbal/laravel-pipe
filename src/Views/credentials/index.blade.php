@@ -19,7 +19,6 @@
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Provider</th>
                         <th>Username</th>
                         <th>Type</th>
                         <th>Action</th>
@@ -29,9 +28,9 @@
                     @foreach (\Fikrimi\Pipe\Models\Credential::all() as $credential)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ \Fikrimi\Pipe\Enum\Provider::$names[$credential->provider] }}</td>
                             <td>{{ $credential->username }}</td>
                             <td>{{ \Fikrimi\Pipe\Models\Credential::$typeNames[$credential->type] }}</td>
+                            <td>{{ $credential->fingerprint }}</td>
                             <td>
                                 <button type="submit" form="form-delete" formaction="{{ route('pipe.credentials.destroy', $credential) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                             </td>

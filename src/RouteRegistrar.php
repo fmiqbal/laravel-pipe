@@ -16,7 +16,7 @@ class RouteRegistrar
     /**
      * Create a new route registrar instance.
      *
-     * @param  \Illuminate\Contracts\Routing\Registrar  $router
+     * @param \Illuminate\Contracts\Routing\Registrar $router
      * @return void
      */
     public function __construct(Router $router)
@@ -32,11 +32,11 @@ class RouteRegistrar
     public function all()
     {
         $this->router->group([
-            'as' => 'pipe.'
+            'as' => 'pipe.',
         ], function (Router $router) {
             $router->get('/', [
                 'uses' => 'DashboardController@index',
-                'as' => 'dashboard.index',
+                'as'   => 'dashboard.index',
             ]);
 
             $router->resource('projects', 'ProjectController');

@@ -1,11 +1,27 @@
 {
     "name": "fikrimi/pipe",
-    "description": "CI/CD for Laravel",
+    "description": "Yet Another Laravel CI/CD Tools",
     "authors": [
         {
             "name": "Fikri Muhammad Iqbal",
             "email": "fikri.miqbal23@gmail.com"
         }
     ],
-    "minimum-stability": "dev"
+    "require": {
+        "php": ">=7",
+        "illuminate/support": "^6",
+	"laravelcollective/remote": "^6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fikrimi\\Pipe\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Fikrimi\\Pipe\\PipeServiceProvider"
+            ]
+        }
+    }
 }

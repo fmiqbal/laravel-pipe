@@ -31,7 +31,8 @@
                             <td>{{ \Fikrimi\Pipe\Enum\Provider::$names[$project->provider] }}</td>
                             <td>{{ $project->name }}</td>
                             <td>
-                                <button type="submit" form="form-delete" formaction="{{ route('pipe.projects.destroy', $project) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+                                <a class="btn btn-primary btn-sm" href="{{ route('pipe.projects.show', $project) }}"><i class="fas fa-eye fa-fw"></i> Show</a>
+                                <button type="submit" form="form-delete" formaction="{{ route('pipe.projects.destroy', $project) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash fa-fw"></i> Delete</button>
                             </td>
                         </tr>
                     @endforeach

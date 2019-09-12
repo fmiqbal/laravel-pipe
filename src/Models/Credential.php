@@ -10,10 +10,10 @@ class Credential extends Model
 {
     use HasCreator;
 
-    public const T_SSH = 0;
+    public const T_KEY = 0;
     public const T_PASS = 1;
     public static $typeNames = [
-        self::T_SSH  => 'SSH',
+        self::T_KEY  => 'Private Key',
         self::T_PASS => 'Password',
     ];
 

@@ -16,8 +16,8 @@ class CreateCredentialsTable extends Migration
         Schema::create('credentials', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('username');
-            $table->smallInteger('provider');
             $table->smallInteger('type');
+            $table->string('fingerprint');
             $table->text('auth');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
