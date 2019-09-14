@@ -47,42 +47,54 @@ class Deploy implements ShouldQueue
 
         Cache::delete($key);
 
-        $checker = 'echo "$DEPLOY_TOKEN $?"';
+        //$checker = 'echo "' . $id . ' $?"';
+        $checker = 'echo ' . $id . ' $?';
 
         $commands = collect([
-            "export DEPLOY_TOKEN=$id",
             'cd ' . $project['dir_deploy'],
-            //'git pull',
-            //'echo $?',
+            'git pull',
         ]);
 
-        $statuses = [];
+        $statuses = collect([]);
 
-        SSH::connect([
+        $ssh = SSH::connect([
             'host'     => $project['host'],
             'username' => $cred['username'],
 
             Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
-        ])
-            ->run(
-                $commands
-                    ->map(function ($item) use ($checker) {
-                        return [$item, $checker];
-                    })
-                    ->flatten()
-                    ->toArray(),
-                function ($line) use ($id, &$statuses) {
-                    $status = explode(' ', $line);
-                    if ($status[0] ?? '' === $id) {
-                        $statuses[] = trim($status[1]);
-                    }
-                    //Cache::put($key, (Cache::get($key) ?: '') . "\n" . $line);
-                });
-        $commands = $commands->zip($statuses);
+        ]);
+
+        $last = '';
+
+        $ssh->run(
+            $commands
+                ->map(function ($item) use ($checker) {
+                    return $item . ' && ' . $checker;
+                })
+                ->flatten()
+                ->toArray(),
+            function ($line) use ($id, &$statuses, &$last) {
+                $status = explode(' ', $line);
+                if (($status[0] ?? '') === $id) {
+                    $statuses[] = trim($status[1]);
+                }
+
+                $last = $line;
+            });
+
+        $statuses = $statuses->pad($commands->count(), '1');
+        $commands = $commands->zip($statuses->toArray());
+
+        $success = $commands->every(function ($item) {
+            return $item[1] == 0;
+        });
 
         $this->build->update([
+            'meta'       => [
+                'last_line' => $last,
+            ],
             'meta_steps' => $commands->toArray(),
-            'status'     => Build::S_SUCCESS,
+            'status'     => $success ? Build::S_SUCCESS : Build::S_FAILED,
         ]);
     }
 }
