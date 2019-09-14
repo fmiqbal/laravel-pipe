@@ -22,9 +22,9 @@
 </head>
 
 <body id="page-top">
-
 <!-- Page Wrapper -->
 <div id="wrapper">
+    <span></span>
 
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
@@ -75,6 +75,16 @@
 
             <!-- Begin Page Content -->
             <div class="container-fluid p-t-30">
+                @if ($errors->any())
+                    @foreach ($errors->all() as $error)
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close m-t-10" data-dismiss="alert">&times;</button>
+                            <h6 class="p-t-10"><strong><span style="color: red">PERHATIAN !</span></strong> {{ $error }}
+                            </h6>
+                        </div>
+                    @endforeach
+                @endif
+
                 @yield('content')
             </div>
             <!-- /.container-fluid -->

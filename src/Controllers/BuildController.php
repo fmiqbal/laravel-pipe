@@ -3,29 +3,61 @@
 namespace Fikrimi\Pipe\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
+use Fikrimi\Pipe\Exceptions\ApplicationException;
+use Fikrimi\Pipe\Jobs\Deploy;
+use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Project;
+use Str;
 
 class BuildController extends Controller
 {
-    public function build(Project $project)
+    /**
+     * @param \Fikrimi\Pipe\Models\Project $project
+     * @param \Fikrimi\Pipe\Models\Build $build
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
+     */
+    public function build(Project $project, Build $build)
     {
-        $cred = $project->credential;
-        \Cache::delete('output');
-        \SSH::connect([
-            'host'     => $project->host,
-            'username' => $cred->username,
-            'keytext'  => \Crypt::decrypt($cred->auth),
-        ])
-            ->run([
-                'cd ' . $project->dir_deploy,
-                'echo $?',
-                'git pull',
-                'echo $?',
-            ], function ($line) {
-                $output = \Cache::get('output') ?: '';
+        if ($project->builds()->whereNotIn('status', Build::getFinishStatuses())->exists()) {
+            return back()->withErrors('Masih terdapat build yang belum selesai');
+        }
 
-                $output .= "\n" . $line;
-                \Cache::put('output', $output);
-            });
+        try {
+            $project->load('credential');
+            $build->fill([
+                'id'           => Str::orderedUuid(),
+                'status'       => Build::S_PROVISIONING,
+                'meta'         => json_decode('{}'),
+                'meta_project' => $project->toArray(),
+                'invoker'      => 'manual',
+            ]);
+
+            $project->builds()->save($build);
+
+            Deploy::dispatch($project);
+        } catch (Exception $e) {
+            throw new ApplicationException($e);
+        }
+
+        return back();
+    }
+
+    public function show(Project $project, Build $build)
+    {
+        return view('pipe::builds.show')->with([
+            'project' => $project,
+            'build'   => $build,
+        ]);
+    }
+
+    public function destroy(Project $project, Build $build)
+    {
+        $build->update([
+            'status' => Build::S_TERMINATED,
+        ]);
+
+        return back();
     }
 }

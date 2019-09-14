@@ -5,7 +5,7 @@
 @endpush
 
 @section('content')
-    <form method="post" action="{{ route('pipe.projects.builds.build', $project) }}" id="form-build">
+    <form method="post" action="{{ route('pipe.builds.build', $project) }}" id="form-build">
         @csrf
     </form>
     <!-- Page Heading -->
@@ -84,15 +84,24 @@
                             <th>Date</th>
                             <th>Invoker</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach ($project->builds as $build)
+                        @foreach ($project->builds()->latest()->get() as $build)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $build->created_at  }}</td>
                                 <td>{{ $build->invoker }}</td>
-                                <td>{{ $build->status }}</td>
+                                <td>{{ ucwords($build->status_name) }}</td>
+                                <td>
+                                    <a href="{{ route('pipe.builds.show', $build) }}" class="btn btn-primary btn-sm">
+                                        Details
+                                    </a>
+                                    <button type="submit" form="form-destroy" class="btn btn-danger btn-sm" formaction="{{ route('pipe.builds.destroy', $build) }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </td>
                             </tr>
                         @endforeach
                         </tbody>
@@ -101,6 +110,10 @@
             </div>
         </div>
     </div>
+    <form id="form-destroy" method="post">
+        @method('delete')
+        @csrf
+    </form>
 @endsection
 
 @push('js')

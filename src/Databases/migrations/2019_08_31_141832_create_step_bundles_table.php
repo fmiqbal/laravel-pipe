@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBuildsTable extends Migration
+class CreateStepBundlesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateBuildsTable extends Migration
      */
     public function up()
     {
-        Schema::create('builds', function (Blueprint $table) {
+        Schema::create('step_bundles', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('project_id');
             $table->string('invoker');
@@ -36,6 +36,6 @@ class CreateBuildsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('builds');
+        Schema::dropIfExists('step_bundles');
     }
 }

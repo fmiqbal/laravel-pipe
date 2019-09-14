@@ -14,6 +14,9 @@ class Project extends Model
         return $this->belongsTo(Credential::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function builds()
     {
         return $this->hasMany(Build::class);

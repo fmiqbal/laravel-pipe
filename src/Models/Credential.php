@@ -17,5 +17,15 @@ class Credential extends Model
         self::T_PASS => 'Password',
     ];
 
+    public static $typeAuth = [
+        self::T_KEY  => 'keytext',
+        self::T_PASS => 'password',
+    ];
+
     protected $guarded = [];
+
+    public static function getAuth($credential)
+    {
+        return self::$typeAuth[$credential['type']];
+    }
 }

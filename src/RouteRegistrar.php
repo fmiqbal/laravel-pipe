@@ -41,15 +41,19 @@ class RouteRegistrar
                 'as'   => 'dashboard.index',
             ]);
 
+            $router->post('projects/{project}/builds/build', [
+                'uses' => 'BuildController@build',
+                'as'   => 'builds.build',
+            ]);
+            $router->resource('builds', 'BuildController', [
+                'except' => ['create', 'store']
+            ]);
             $router->resource('projects', 'ProjectController');
             $router->resource('credentials', 'CredentialController');
-            $router->post('projects/{project}/build', [
-                'uses' => 'BuildController@build',
-                'as'   => 'projects.builds.build',
-            ]);
+
             $router->post('webhook/{project}', [
                 'uses' => 'BuildController@build',
-                'as'   => 'projects.builds.webhook',
+                'as'   => 'builds.webhook',
             ]);
         });
     }
