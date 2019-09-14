@@ -25,19 +25,23 @@ class BuildController extends Controller
         }
 
         try {
+            \DB::beginTransaction();
             $project->load('credential');
             $build->fill([
                 'id'           => Str::orderedUuid(),
                 'status'       => Build::S_PROVISIONING,
                 'meta'         => json_decode('{}'),
+                'meta_steps'   => json_decode('{}'),
                 'meta_project' => $project->toArray(),
                 'invoker'      => 'manual',
             ]);
 
             $project->builds()->save($build);
 
-            Deploy::dispatch($project);
+            Deploy::dispatch($build);
+            \DB::commit();
         } catch (Exception $e) {
+            \DB::rollBack();
             throw new ApplicationException($e);
         }
 
@@ -54,6 +58,10 @@ class BuildController extends Controller
 
     public function destroy(Project $project, Build $build)
     {
+        if (in_array($build->status, Build::getFinishStatuses())) {
+            return back();
+        }
+
         $build->update([
             'status' => Build::S_TERMINATED,
         ]);

@@ -5,7 +5,7 @@
 @endpush
 
 @section('content')
-    <form method="post" action="{{ route('pipe.builds.build', $project) }}" id="form-build">
+    <form method="post" action="{{ route('pipe.build', $project) }}" id="form-build">
         @csrf
     </form>
     <!-- Page Heading -->

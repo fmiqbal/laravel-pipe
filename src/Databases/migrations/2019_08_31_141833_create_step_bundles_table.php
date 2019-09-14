@@ -14,18 +14,7 @@ class CreateStepBundlesTable extends Migration
     public function up()
     {
         Schema::create('step_bundles', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('project_id');
-            $table->string('invoker');
-            $table->char('status');
-            $table->json('meta');
-            $table->json('meta_project');
-            $table->timestamps();
-
-            $table->foreign('project_id')->references('id')
-                ->on('projects')
-                ->onUpdate('CASCADE')
-                ->onDelete('CASCADE');
+            $table->bigIncrements('id');
         });
     }
 

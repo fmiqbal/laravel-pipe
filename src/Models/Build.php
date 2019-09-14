@@ -22,6 +22,7 @@ class Build extends Model
     public $incrementing = false;
     protected $casts = [
         'meta'         => 'json',
+        'meta_steps'   => 'json',
         'meta_project' => 'json',
     ];
     protected $guarded = [];

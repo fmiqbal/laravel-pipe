@@ -43,8 +43,20 @@ class Deploy implements ShouldQueue
 
         $cred = $project['credential'];
         $key = $this->build->getCacheKey();
+        $id = $this->build->id;
 
         Cache::delete($key);
+
+        $checker = 'echo "$DEPLOY_TOKEN $?"';
+
+        $commands = collect([
+            "export DEPLOY_TOKEN=$id",
+            'cd ' . $project['dir_deploy'],
+            //'git pull',
+            //'echo $?',
+        ]);
+
+        $statuses = [];
 
         SSH::connect([
             'host'     => $project['host'],
@@ -52,13 +64,25 @@ class Deploy implements ShouldQueue
 
             Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
         ])
-            ->run([
-                'cd ' . $project['dir_deploy'],
-                'echo $?',
-                'git pull',
-                'echo $?',
-            ], function ($line) use ($key) {
-                Cache::put($key, (Cache::get($key) ?: '') . "\n" . $line);
-            });
+            ->run(
+                $commands
+                    ->map(function ($item) use ($checker) {
+                        return [$item, $checker];
+                    })
+                    ->flatten()
+                    ->toArray(),
+                function ($line) use ($id, &$statuses) {
+                    $status = explode(' ', $line);
+                    if ($status[0] ?? '' === $id) {
+                        $statuses[] = trim($status[1]);
+                    }
+                    //Cache::put($key, (Cache::get($key) ?: '') . "\n" . $line);
+                });
+        $commands = $commands->zip($statuses);
+
+        $this->build->update([
+            'meta_steps' => $commands->toArray(),
+            'status'     => Build::S_SUCCESS,
+        ]);
     }
 }

@@ -41,9 +41,9 @@ class RouteRegistrar
                 'as'   => 'dashboard.index',
             ]);
 
-            $router->post('projects/{project}/builds/build', [
+            $router->post('projects/{project}/build', [
                 'uses' => 'BuildController@build',
-                'as'   => 'builds.build',
+                'as'   => 'build',
             ]);
             $router->resource('builds', 'BuildController', [
                 'except' => ['create', 'store']
