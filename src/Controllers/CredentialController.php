@@ -3,11 +3,10 @@
 namespace Fikrimi\Pipe\Controllers;
 
 use App\Http\Controllers\Controller;
-use Crypt;
+use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
-use phpseclib\Crypt\RSA;
 
 class CredentialController extends Controller
 {
@@ -35,22 +34,12 @@ class CredentialController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Fikrimi\Pipe\Models\Credential $credential
      * @return void
      */
-    public function store(Request $request, Credential $credential)
+    public function store(Request $request)
     {
-        $key = new RSA();
-        $key->loadKey($request->auth);
-
-        $credential
-            ->fill([
-                'username'    => $request->get('username'),
-                'type'        => $request->get('type'),
-                'auth'        => Crypt::encrypt($request->get('auth')),
-                'fingerprint' => $key->getPublicKeyFingerprint(),
-            ])
-            ->save();
+        CredentialRepo::fromRequest($request)
+            ->store();
 
         return redirect()->route('pipe.credentials.index');
     }

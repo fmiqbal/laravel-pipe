@@ -2,6 +2,7 @@
 
 namespace Fikrimi\Pipe;
 
+use App;
 use Illuminate\Support\ServiceProvider;
 
 class PipeServiceProvider extends ServiceProvider
@@ -16,7 +17,7 @@ class PipeServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/Views', 'pipe');
         $this->loadMigrationsFrom(__DIR__ . '/Databases/migrations');
         $this->publishes([
-            __DIR__ . '/Views/assets' => public_path('pipe-assets')
+            __DIR__ . '/Views/assets' => public_path('pipe-assets'),
         ], 'pipe-assets');
     }
 
@@ -27,6 +28,14 @@ class PipeServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $repositories = [
+            'CredentialRepo' => \Fikrimi\Pipe\Repositories\CredentialRepo::class,
+        ];
+
+        foreach ($repositories as $name => $class) {
+            App::bind($name, function () use ($class) {
+                return new $class();
+            });
+        }
     }
 }
