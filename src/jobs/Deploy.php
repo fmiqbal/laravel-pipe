@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Pusher\Pusher;
 use SSH;
 
 class Deploy implements ShouldQueue
@@ -36,6 +37,7 @@ class Deploy implements ShouldQueue
      *
      * @return void
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Pusher\PusherException
      */
     public function handle()
     {
@@ -51,7 +53,9 @@ class Deploy implements ShouldQueue
         $checker = 'echo ' . $id . ' $?';
 
         $commands = collect([
+            'echo "========= GO TO DEPLOY DIR =========="',
             'cd ' . $project['dir_deploy'],
+            'echo "========= DEPLOYING =========="',
             'git pull',
         ]);
 
@@ -64,23 +68,57 @@ class Deploy implements ShouldQueue
             Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
         ]);
 
-        $last = '';
+        $pusher = new Pusher(
+            '0d289eb62a8539cda514',
+            'e29f55177c2ce50ecab9',
+            '870492',
+            [
+                'cluster' => 'ap1',
+                'useTLS'  => true,
+            ]
+        );
 
-        $ssh->run(
-            $commands
-                ->map(function ($item) use ($checker) {
-                    return $item . ' && ' . $checker;
-                })
-                ->flatten()
-                ->toArray(),
-            function ($line) use ($id, &$statuses, &$last) {
-                $status = explode(' ', $line);
-                if (($status[0] ?? '') === $id) {
-                    $statuses[] = trim($status[1]);
-                }
+        $lines = [];
 
-                $last = $line;
-            });
+        try {
+            $ssh->run(
+                $commands
+                    ->map(function ($item) use ($checker) {
+                        return $item . ' && ' . $checker;
+                    })
+                    ->flatten()
+                    ->toArray(),
+                function ($line) use ($id, &$lines, &$statuses, &$last, $pusher) {
+                    $status = explode(' ', $line);
+                    if (($status[0] ?? '') === $id) {
+                        $statuses[] = trim($status[1]);
+                    } else {
+                        $lines[] = $line;
+                        $pusher->trigger('terminal-' . $id, 'output', [
+                            'line' => $line,
+                        ]);
+                    }
+
+                    $last = $line;
+                });
+        } catch (\Exception $e) {
+            $this->build->update([
+                'status' => Build::S_FAILED,
+                'meta'   => [
+                    'last_line' => $e->getMessage(),
+                ],
+            ]);
+
+            $pusher->trigger('terminal-' . $id, 'finished', [
+                'finished' => true
+            ]);
+
+            return;
+        }
+
+        $pusher->trigger('terminal-' . $id, 'finished', [
+            'finished' => true
+        ]);
 
         $statuses = $statuses->pad($commands->count(), '1');
         $commands = $commands->zip($statuses->toArray());
@@ -91,10 +129,18 @@ class Deploy implements ShouldQueue
 
         $this->build->update([
             'meta'       => [
+                'lines'     => $lines,
                 'last_line' => $last,
             ],
             'meta_steps' => $commands->toArray(),
             'status'     => $success ? Build::S_SUCCESS : Build::S_FAILED,
         ]);
+    }
+
+    public function fail($exception = null)
+    {
+        if ($this->job) {
+            $this->job->fail($exception);
+        }
     }
 }

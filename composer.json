@@ -10,7 +10,9 @@
     "require": {
         "php": ">=7",
         "illuminate/support": "^6",
-	"laravelcollective/remote": "^6"
+        "laravelcollective/remote": "^6",
+        "pusher/pusher-php-server": "^4.0",
+        "ext-sodium": "*"
     },
     "autoload": {
         "psr-4": {
