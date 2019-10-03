@@ -17,8 +17,9 @@ class PipeServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/Views', 'pipe');
         $this->loadMigrationsFrom(__DIR__ . '/Databases/migrations');
         $this->publishes([
+            __DIR__ . '/config.php' => config_path() . '/pipe.php',
             __DIR__ . '/Views/assets' => public_path('pipe-assets'),
-        ], 'pipe-assets');
+        ], 'pipe');
     }
 
     /**
