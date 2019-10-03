@@ -14,5 +14,5 @@ interface RepositoryInterface
 
     public function fromArray($array);
 
-    public function store();
+    public function store(array $array = []);
 }
