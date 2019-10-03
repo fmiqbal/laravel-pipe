@@ -47,8 +47,10 @@ abstract class Repository implements RepositoryInterface
         return $this;
     }
 
-    public function store()
+    public function store(array $array = [])
     {
         $this->model->save();
+
+        return $this->model;
     }
 }

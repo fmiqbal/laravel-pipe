@@ -2,11 +2,9 @@
 
 namespace Fikrimi\Pipe\Models;
 
-use Fikrimi\Pipe\Enum\Provider;
 use Fikrimi\Pipe\Models\Traits\HasCreator;
-use Illuminate\Database\Eloquent\Model;
 
-class Credential extends Model
+class Credential extends BaseModel
 {
     use HasCreator;
 

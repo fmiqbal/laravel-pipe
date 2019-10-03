@@ -2,12 +2,10 @@
 
 namespace Fikrimi\Pipe\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Project extends Model
+class Project extends BaseModel
 {
-    protected $guarded = [];
     public $incrementing = false;
+    protected $guarded = [];
 
     public function credential()
     {

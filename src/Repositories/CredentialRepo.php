@@ -7,15 +7,18 @@ use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Fikrimi\Pipe\Models\Credential;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
-use phpseclib\Crypt\RSA;
 use RuntimeException;
 
 class CredentialRepo extends Repository
 {
     protected static $modelName = Credential::class;
 
-    public function store()
+    public function store(array $array = [])
     {
+        if (! empty($array)) {
+            $this->fromArray($array);
+        }
+
         $this->model->auth = Crypt::encrypt($this->model->auth);
         $this->model->fingerprint = $this->getFingerprint();
 
@@ -28,6 +31,8 @@ class CredentialRepo extends Repository
         }
 
         $this->model->save();
+
+        return $this->model;
     }
 
     /**

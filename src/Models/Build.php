@@ -2,9 +2,7 @@
 
 namespace Fikrimi\Pipe\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Build extends Model
+class Build extends BaseModel
 {
     public const S_PROVISIONING = 0;
     public const S_RUNNING = 1;
