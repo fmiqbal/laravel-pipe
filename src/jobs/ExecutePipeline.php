@@ -14,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Pusher\Pusher;
 use SSH;
 
-class Deploy implements ShouldQueue
+class ExecutePipeline implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     /**
