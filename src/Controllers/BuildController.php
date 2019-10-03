@@ -5,7 +5,7 @@ namespace Fikrimi\Pipe\Controllers;
 use App\Http\Controllers\Controller;
 use Exception;
 use Fikrimi\Pipe\Exceptions\ApplicationException;
-use Fikrimi\Pipe\Jobs\Deploy;
+use Fikrimi\Pipe\Jobs\ExecutePipeline;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Project;
 use Str;
@@ -38,7 +38,7 @@ class BuildController extends Controller
 
             $project->builds()->save($build);
 
-            Deploy::dispatch($build);
+            ExecutePipeline::dispatch($build);
             \DB::commit();
         } catch (Exception $e) {
             \DB::rollBack();
