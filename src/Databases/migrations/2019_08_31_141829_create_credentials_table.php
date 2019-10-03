@@ -13,7 +13,7 @@ class CreateCredentialsTable extends Migration
      */
     public function up()
     {
-        Schema::create('credentials', function (Blueprint $table) {
+        Schema::create('pipe_credentials', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('username');
             $table->smallInteger('type');
@@ -31,6 +31,6 @@ class CreateCredentialsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('credentials');
+        Schema::dropIfexists('pipe_credentials');
     }
 }

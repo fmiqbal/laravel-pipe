@@ -13,7 +13,7 @@ class CreateBuildsTable extends Migration
      */
     public function up()
     {
-        Schema::create('builds', function (Blueprint $table) {
+        Schema::create('pipe_builds', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('project_id');
             $table->string('invoker');
@@ -24,7 +24,7 @@ class CreateBuildsTable extends Migration
             $table->timestamps();
 
             $table->foreign('project_id')->references('id')
-                ->on('projects')
+                ->on('pipe_projects')
                 ->onUpdate('CASCADE')
                 ->onDelete('CASCADE');
         });
@@ -37,6 +37,6 @@ class CreateBuildsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('builds');
+        Schema::dropIfexists('pipe_builds');
     }
 }
