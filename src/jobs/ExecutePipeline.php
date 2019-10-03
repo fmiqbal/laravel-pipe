@@ -41,34 +41,97 @@ class ExecutePipeline implements ShouldQueue
      */
     public function handle()
     {
-        $project = $this->build->meta_project;
+        $build = $this->build;
+        $project = $build->meta_project;
 
         $cred = $project['credential'];
-        $key = $this->build->getCacheKey();
-        $id = $this->build->id;
+        $key = $build->getCacheKey();
+        $id = $build->id;
+
+        $broadcaster = $this->getBroadcaster();
+        $ssh = $this->getSSH($project, $cred);
 
         Cache::delete($key);
 
-        //$checker = 'echo "' . $id . ' $?"';
-        $checker = 'echo ' . $id . ' $?';
+        $dir = date('YmdHis-') . $build->id;
+        $url = \Fikrimi\Pipe\Enum\Provider::$repositoryUrlSsh[$project['provider']] . $project['namespace'];
+        $branch = 'master';
 
         $commands = collect([
-            'echo "========= GO TO DEPLOY DIR =========="',
-            'cd ' . $project['dir_deploy'],
-            'echo "========= DEPLOYING =========="',
-            'git pull',
+            // preparing
+            "cd {$project['dir_workspace']}",
+            'mkdir -p builds/base',
+            'cd builds/base',
+            'git init',
+            "git remote remove origin; git remote add origin {$url}",
+            'git fetch',
+            "git reset --hard origin/{$branch}",
+            'cd ..',
+            "rsync -aq base/ {$dir} --exclude .git",
+            "cd $dir",
+            // building
+
+            // linking
+            "rm -rf {$project['dir_deploy']}",
+            "ln -s {$project['dir_workspace']}/builds/{$dir} {$project['dir_deploy']}",
         ]);
 
         $statuses = collect([]);
+        $lines = [];
 
-        $ssh = SSH::connect([
-            'host'     => $project['host'],
-            'username' => $cred['username'],
+        $success = null;
+        try {
+            $ssh->run(
+                $this->prepCommands($commands),
+                function ($line) use ($id, &$lines, &$statuses, &$last, $broadcaster) {
+                    $status = explode(' ', $line);
 
-            Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
+                    if (($status[0] ?? '') === $id) {
+                        $statuses[] = trim($status[1]);
+                    } else {
+                        $lines[] = $line;
+                        $broadcaster->trigger('terminal-' . $id, 'output', [
+                            'line' => $line,
+                        ]);
+                    }
+
+                    $last = $line;
+                });
+        } catch (\Exception $e) {
+            $last = $e->getMessage();
+            $success = false;
+        }
+
+        $statuses = $statuses->pad($commands->count(), '1');
+        $commands = $commands->zip($statuses->toArray());
+
+        if ($success !== false) {
+            $success = $commands->every(function ($item) {
+                return $item[1] == 0;
+            });
+        }
+
+        $build->update([
+            'meta'       => [
+                'lines'     => $lines,
+                'last_line' => $last,
+            ],
+            'meta_steps' => $commands->toArray(),
+            'status'     => $success ? Build::S_SUCCESS : Build::S_FAILED,
         ]);
 
-        $pusher = new Pusher(
+        $broadcaster->trigger('terminal-' . $id, 'finished', [
+            'finished' => true,
+        ]);
+    }
+
+    /**
+     * @return \Pusher\Pusher
+     * @throws \Pusher\PusherException
+     */
+    private function getBroadcaster(): \Pusher\Pusher
+    {
+        $broadcaster = new Pusher(
             '0d289eb62a8539cda514',
             'e29f55177c2ce50ecab9',
             '870492',
@@ -78,69 +141,40 @@ class ExecutePipeline implements ShouldQueue
             ]
         );
 
-        $lines = [];
-
-        try {
-            $ssh->run(
-                $commands
-                    ->map(function ($item) use ($checker) {
-                        return $item . ' && ' . $checker;
-                    })
-                    ->flatten()
-                    ->toArray(),
-                function ($line) use ($id, &$lines, &$statuses, &$last, $pusher) {
-                    $status = explode(' ', $line);
-                    if (($status[0] ?? '') === $id) {
-                        $statuses[] = trim($status[1]);
-                    } else {
-                        $lines[] = $line;
-                        $pusher->trigger('terminal-' . $id, 'output', [
-                            'line' => $line,
-                        ]);
-                    }
-
-                    $last = $line;
-                });
-        } catch (\Exception $e) {
-            $this->build->update([
-                'status' => Build::S_FAILED,
-                'meta'   => [
-                    'last_line' => $e->getMessage(),
-                ],
-            ]);
-
-            $pusher->trigger('terminal-' . $id, 'finished', [
-                'finished' => true
-            ]);
-
-            return;
-        }
-
-        $pusher->trigger('terminal-' . $id, 'finished', [
-            'finished' => true
-        ]);
-
-        $statuses = $statuses->pad($commands->count(), '1');
-        $commands = $commands->zip($statuses->toArray());
-
-        $success = $commands->every(function ($item) {
-            return $item[1] == 0;
-        });
-
-        $this->build->update([
-            'meta'       => [
-                'lines'     => $lines,
-                'last_line' => $last,
-            ],
-            'meta_steps' => $commands->toArray(),
-            'status'     => $success ? Build::S_SUCCESS : Build::S_FAILED,
-        ]);
+        return $broadcaster;
     }
 
-    public function fail($exception = null)
+    /**
+     * @param $project
+     * @param $cred
+     * @return \Collective\Remote\Connection
+     */
+    private function getSSH($project, $cred): \Collective\Remote\Connection
     {
-        if ($this->job) {
-            $this->job->fail($exception);
+        $ssh = SSH::connect([
+            'host'     => $project['host'],
+            'username' => $cred['username'],
+
+            Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
+        ]);
+
+        return $ssh;
+    }
+
+    private function prepCommands($commands)
+    {
+        if (! $commands instanceof \Illuminate\Support\Collection) {
+            $commands = collect($commands);
         }
+
+        // Check last status
+        $checker = 'echo ' . $this->build->id . ' $?';
+
+        return collect($commands)
+            ->map(function ($item) use ($checker) {
+                return "echo \"executing $item\";" . $item . '; ' . $checker;
+            })
+            ->flatten()
+            ->toArray();
     }
 }
