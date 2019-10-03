@@ -16,6 +16,12 @@ class Provider extends Enum
         self::BITBUCKET => 'BitBucket',
     ];
 
+    public static $repositoryUrlSsh = [
+        self::GITLAB    => 'git@gitlab.com:',
+        self::GITHUB    => 'git@github.com:',
+        self::BITBUCKET => 'git@bitbucket.com:',
+    ];
+
     public static function getRepositories()
     {
         $repo = self::$names;
