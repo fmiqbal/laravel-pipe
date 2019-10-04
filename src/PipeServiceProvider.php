@@ -14,11 +14,11 @@ class PipeServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->loadViewsFrom(__DIR__ . '/Views', 'pipe');
-        $this->loadMigrationsFrom(__DIR__ . '/Databases/migrations');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'pipe');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->publishes([
-            __DIR__ . '/config.php' => config_path() . '/pipe.php',
-            __DIR__ . '/Views/assets' => public_path('pipe-assets'),
+            __DIR__ . '/../config/pipe.php'   => config_path() . '/pipe.php',
+            __DIR__ . '/../resources/views/assets' => public_path('pipe-assets'),
         ], 'pipe');
     }
 
