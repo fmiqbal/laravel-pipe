@@ -33,11 +33,6 @@ class Build extends BaseModel
         ];
     }
 
-    public function getCacheKey()
-    {
-        return $this->id;
-    }
-
     //public function getMetaProjectObjAttribute()
     //{
     //    return json_encode(j)
@@ -51,5 +46,10 @@ class Build extends BaseModel
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function steps()
+    {
+        return $this->hasMany(Step::class);
     }
 }

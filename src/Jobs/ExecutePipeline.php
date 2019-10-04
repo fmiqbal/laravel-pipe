@@ -2,10 +2,8 @@
 
 namespace Fikrimi\Pipe\Jobs;
 
-use Cache;
 use Collective\Remote\Connection;
 use Crypt;
-use Exception;
 use Fikrimi\Pipe\Enum\Provider;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Credential;
@@ -21,6 +19,9 @@ use SSH;
 class ExecutePipeline implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $timeout = 300;
+
     /**
      * @var \Fikrimi\Pipe\Models\Project
      */
@@ -46,6 +47,8 @@ class ExecutePipeline implements ShouldQueue
      */
     public function __construct(Build $build)
     {
+        set_time_limit(300);
+
         $this->build = $build;
         $this->broadcaster = $this->getBroadcaster();
         $this->ssh = $this->getSSH($build->project, $build->project['credential']);
@@ -61,68 +64,52 @@ class ExecutePipeline implements ShouldQueue
      * Execute the job.
      *
      * @return void
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \Pusher\PusherException
+     * @throws \Exception
      */
     public function handle()
     {
-        /*
-         * Yang harus di remake, harusnya struktur per command nya dirubah
-         * bisa jadi satu command itu jadi object, isinya:
-         * command yang di eksekusi
-         * output nya
-         * status nya
-         * */
-
         $build = $this->build;
         $project = $build->meta_project;
-
-        $key = $build->getCacheKey();
-        $id = $build->id;
-
-        Cache::delete($key);
 
         $dir = date('YmdHis-') . $build->id;
         $url = Provider::$repositoryUrlSsh[$project['provider']] . $project['namespace'];
         $branch = 'master';
 
-        $preBuild = collect([
-            // preparing
-            "cd {$project['dir_workspace']}",
-            'mkdir -p builds/base',
-            'cd builds/base',
-            'git init',
-            "git remote remove origin; git remote add origin {$url}",
-            'git fetch',
-            "git reset --hard origin/{$branch}",
-            'cd ..',
-            "rsync -aq base/ {$dir} --exclude .git",
-            "cd $dir",
+        $commands = $this->prepCommands([
+            'pre-build'  => [
+                "\cd {$project['dir_workspace']}",
+                'mkdir -p builds/base',
+                '\cd builds/base',
+                'git init',
+                "git remote remove origin; git remote add origin {$url}",
+                'git fetch',
+                "git reset --hard origin/{$branch}",
+                "\cd {$project['dir_workspace']}/builds",
+                "rsync -aq base/ {$dir} --exclude .git",
+                "\cd $dir",
+            ],
+            'build'      => [
+
+            ],
+            'post-build' => [
+                "rm -rf {$project['dir_deploy']}",
+                "ln -s {$project['dir_workspace']}/builds/{$dir} {$project['dir_deploy']}",
+            ],
         ]);
 
-        $build = collect([
-            // building
-        ]);
-
-        $postBuild = collect([
-            "rm -rf {$project['dir_deploy']}",
-            "ln -s {$project['dir_workspace']}/builds/{$dir} {$project['dir_deploy']}",
-        ]);
-
-        try {
-            $this->ssh->run($this->prepCommands($preBuild));
-
-            $this->ssh->run(
-                $this->prepCommands($build),
-                function ($line) {
-                    $this->buildHook($line);
-                });
-
-            $this->ssh->run($this->prepCommands($postBuild));
-        } catch (Exception $e) {
-            $last = $e->getMessage();
-            $success = false;
-        }
+        //try {
+        $this->ssh->run(
+            $commands,
+            function ($line) {
+                $this->buildHook($line);
+            });
+        //} catch (Exception $e) {
+        //    throw $e;
+        //    $this->step->update([
+        //        'output' => $e->getMessage(),
+        //    ]);
+        //    $success = false;
+        //}
 
         //$statuses = $statuses->pad($build->count(), '1');
         //$build = $build->zip($statuses->toArray());
@@ -142,9 +129,9 @@ class ExecutePipeline implements ShouldQueue
         //    'status'     => $success ? Build::S_SUCCESS : Build::S_FAILED,
         //]);
 
-        $this->broadcaster->trigger('terminal-' . $id, 'finished', [
-            'finished' => true,
-        ]);
+        //$this->broadcaster->trigger('terminal-' . $build->id, 'finished', [
+        //    'finished' => true,
+        //]);
     }
 
     /**
@@ -175,6 +162,7 @@ class ExecutePipeline implements ShouldQueue
     {
         $ssh = SSH::connect([
             'host'     => $project['host'],
+            'timeout'  => $this->timeout,
             'username' => $cred['username'],
 
             Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
@@ -189,12 +177,24 @@ class ExecutePipeline implements ShouldQueue
             $commands = collect($commands);
         }
 
-        // Check last status
-        $checker = 'echo ' . $this->build->id . ' $?';
+        $steps = [];
 
-        return collect($commands)
-            ->map(function ($item) use ($checker) {
-                return "echo \"executing $item\";" . $item . '; ' . $checker;
+        foreach ($commands as $key => $group) {
+            foreach ($group as $command) {
+                $steps[] = $this->build->steps()->create([
+                    'command' => $command,
+                    'group'   => $key,
+                ]);
+            }
+        }
+
+        return collect($steps)
+            ->map(function ($item) {
+                return ''
+                    . 'echo "pipe-signature start ' . $item->id . '";'
+                    . $item->command . ';'
+                    . 'echo "pipe-signature stop" $?;'
+                    . 'sleep 1';
             })
             ->flatten()
             ->toArray();
@@ -202,24 +202,33 @@ class ExecutePipeline implements ShouldQueue
 
     /**
      * @param $line
-     * @return array
+     * @return void
      * @throws \Pusher\PusherException
      */
     private function buildHook($line)
     {
-        $status = explode(' ', $line);
+        preg_match("[\S+]", $line, $sig);
 
-        //$status, $id, $statuses, $lines, $broadcaster
-        if (($status[0] ?? '') === $this->build->id) {
-            $statuses[] = trim($status[1]);
+        if (($sig[0] ?? '') === 'pipe-signature') {
+            $sig = explode(' ', trim($line));
+            if ($sig[1] === 'start') {
+                $this->step = \Fikrimi\Pipe\Models\Step::find($sig[2]);
+            }
+
+            if ($sig[1] === 'stop') {
+                $this->step->update([
+                    'exit_status' => trim($sig[2]),
+                ]);
+            }
+            //dr($sig, $this->step);
         } else {
-            $lines[] = $line;
+            $this->step->update([
+                'output' => $this->step->output . $line,
+            ]);
+
             $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
                 'line' => $line,
             ]);
         }
-
-        return [$statuses, $lines];
     }
-
 }

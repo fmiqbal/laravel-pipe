@@ -16,9 +16,10 @@ class CreateStepsTable extends Migration
         Schema::create('pipe_steps', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('build_id');
+            $table->string('group')->default('default');
             $table->string('command');
-            $table->unsignedSmallInteger('exit_status');
-            $table->text('output');
+            $table->unsignedSmallInteger('exit_status')->nullable();
+            $table->text('output')->nullable();
             $table->timestamps();
 
             $table->foreign('build_id')->references('id')
