@@ -38,6 +38,10 @@ class ExecutePipeline implements ShouldQueue
      * @var array
      */
     private $meta;
+    /**
+     * @var string
+     */
+    private $signature;
 
     /**
      * Create a new job instance.
@@ -52,6 +56,7 @@ class ExecutePipeline implements ShouldQueue
         $this->build = $build;
         $this->broadcaster = $this->getBroadcaster();
         $this->ssh = $this->getSSH($build->project, $build->project['credential']);
+        $this->signature = hash('crc32', now() . $this->build->id);
 
         $this->meta = [
             'statuses' => collect([]),
@@ -76,7 +81,7 @@ class ExecutePipeline implements ShouldQueue
         $branch = 'master';
 
         $commands = $this->prepCommands([
-            'pre-build'  => [
+            'pipe-preparing-workspace' => [
                 "\cd {$project['dir_workspace']}",
                 'mkdir -p builds/base',
                 '\cd builds/base',
@@ -88,10 +93,10 @@ class ExecutePipeline implements ShouldQueue
                 "rsync -aq base/ {$dir} --exclude .git",
                 "\cd $dir",
             ],
-            'build'      => [
-
+            'build'                    => [
+                'echo "this is building step"',
             ],
-            'post-build' => [
+            'pipe-post-build'          => [
                 "rm -rf {$project['dir_deploy']}",
                 "ln -s {$project['dir_workspace']}/builds/{$dir} {$project['dir_deploy']}",
             ],
@@ -191,9 +196,10 @@ class ExecutePipeline implements ShouldQueue
         return collect($steps)
             ->map(function ($item) {
                 return ''
+                    . 'echo "pipe-signature-' . $this->signature . ' start ' . $item->id . '";'
                     . 'sleep 1;'
                     . $item->command . ';'
-                    . 'echo "pipe-signature stop" $?;'
+                    . 'echo "pipe-signature-' . $this->signature . ' stop" $?;'
                     . 'sleep 1';
             })
             ->flatten()
@@ -209,7 +215,7 @@ class ExecutePipeline implements ShouldQueue
     {
         preg_match("[\S+]", $line, $sig);
 
-        if (($sig[0] ?? '') === 'pipe-signature') {
+        if (($sig[0] ?? '') === 'pipe-signature-' . $this->signature) {
             $sig = explode(' ', trim($line));
             if ($sig[1] === 'start') {
                 $this->step = \Fikrimi\Pipe\Models\Step::find($sig[2]);
@@ -227,9 +233,10 @@ class ExecutePipeline implements ShouldQueue
             ]);
 
             if ((explode('-', $this->step->group)[0] ?? '') !== 'pipe') {
-            $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
-                'line' => $line,
-            ]);
+                $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
+                    'line' => $line,
+                ]);
+            }
         }
     }
 }
