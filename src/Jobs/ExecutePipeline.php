@@ -191,7 +191,7 @@ class ExecutePipeline implements ShouldQueue
         return collect($steps)
             ->map(function ($item) {
                 return ''
-                    . 'echo "pipe-signature start ' . $item->id . '";'
+                    . 'sleep 1;'
                     . $item->command . ';'
                     . 'echo "pipe-signature stop" $?;'
                     . 'sleep 1';
