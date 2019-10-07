@@ -27,8 +27,6 @@ class BuildController extends Controller
             $build->fill([
                 'id'           => Str::orderedUuid(),
                 'status'       => Build::S_PROVISIONING,
-                'meta'         => json_decode('{}'),
-                'meta_steps'   => json_decode('{}'),
                 'meta_project' => $project->toArray(),
                 'invoker'      => 'manual',
             ]);
