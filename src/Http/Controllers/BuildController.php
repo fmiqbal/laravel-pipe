@@ -1,6 +1,6 @@
 <?php
 
-namespace Fikrimi\Pipe\Controllers;
+namespace Fikrimi\Pipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
@@ -8,6 +8,7 @@ use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Fikrimi\Pipe\Jobs\ExecutePipeline;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Project;
+use Illuminate\Http\Request;
 use Str;
 
 class BuildController extends Controller
@@ -18,12 +19,8 @@ class BuildController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
      */
-    public function build(Project $project, Build $build)
+    public function build(Request $request, Project $project, Build $build)
     {
-        if ($project->builds()->whereNotIn('status', Build::getFinishStatuses())->exists()) {
-            return back()->withErrors('Masih terdapat build yang belum selesai');
-        }
-
         try {
             \DB::beginTransaction();
             $project->load('credential');

@@ -1,14 +1,11 @@
 <?php
 
-namespace Fikrimi\Pipe\Controllers;
+namespace Fikrimi\Pipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
-use Fikrimi\Pipe\Models\Credential;
-use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 
-class CredentialController extends Controller
+class DashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,7 +14,7 @@ class CredentialController extends Controller
      */
     public function index()
     {
-        return view('pipe::credentials.index');
+        return view('pipe::index');
     }
 
     /**
@@ -27,30 +24,27 @@ class CredentialController extends Controller
      */
     public function create()
     {
-        return view('pipe::credentials.create');
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @return void
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        CredentialRepo::fromRequest($request)
-            ->store();
-
-        return redirect()->route('pipe.credentials.index');
+        //
     }
 
     /**
      * Display the specified resource.
      *
-     * @param \App\Project $project
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Project $project)
+    public function show($id)
     {
         //
     }
@@ -58,10 +52,10 @@ class CredentialController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param \App\Project $project
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Project $project)
+    public function edit($id)
     {
         //
     }
@@ -70,10 +64,10 @@ class CredentialController extends Controller
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \App\Project $project
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Project $project)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -81,14 +75,11 @@ class CredentialController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \Fikrimi\Pipe\Models\Credential $credential
-     * @return void
-     * @throws \Exception
+     * @param int $id
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(Credential $credential)
+    public function destroy($id)
     {
-        $credential->delete();
-
-        return redirect()->back();
+        //
     }
 }

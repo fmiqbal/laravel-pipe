@@ -1,6 +1,6 @@
 <?php
 
-namespace Fikrimi\Pipe\Controllers;
+namespace Fikrimi\Pipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Fikrimi\Pipe\Models\Project;

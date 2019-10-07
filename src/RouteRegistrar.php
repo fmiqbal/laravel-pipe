@@ -34,7 +34,7 @@ class RouteRegistrar
         $this->router->group([
             'as' => 'pipe.',
             'prefix'    => 'pipe',
-            'namespace' => '\Fikrimi\Pipe\Controllers',
+            'namespace' => '\Fikrimi\Pipe\Http\Controllers',
         ], function (Router $router) {
             $router->get('/', [
                 'uses' => 'DashboardController@index',
