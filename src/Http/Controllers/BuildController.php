@@ -14,6 +14,7 @@ use Str;
 class BuildController extends Controller
 {
     /**
+     * @param \Illuminate\Http\Request $request
      * @param \Fikrimi\Pipe\Models\Project $project
      * @param \Fikrimi\Pipe\Models\Build $build
      * @return \Illuminate\Http\RedirectResponse
