@@ -18,8 +18,6 @@ class CreateBuildsTable extends Migration
             $table->uuid('project_id');
             $table->string('invoker');
             $table->char('status');
-            $table->json('meta');
-            $table->json('meta_steps');
             $table->json('meta_project');
             $table->timestamps();
 

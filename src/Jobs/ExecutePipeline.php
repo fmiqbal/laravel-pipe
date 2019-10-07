@@ -37,10 +37,6 @@ class ExecutePipeline implements ShouldQueue
      */
     private $broadcaster;
     /**
-     * @var array
-     */
-    private $meta;
-    /**
      * @var string
      */
     private $signature;
@@ -63,12 +59,6 @@ class ExecutePipeline implements ShouldQueue
         $this->broadcaster = $this->getBroadcaster();
         $this->ssh = $this->getSSH($build->project, $build->project['credential']);
         $this->signature = hash('crc32', now() . $this->build->id);
-
-        $this->meta = [
-            'statuses' => collect([]),
-            'lines'    => [],
-            'success'  => null,
-        ];
     }
 
     /**
