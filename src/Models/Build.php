@@ -2,6 +2,36 @@
 
 namespace Fikrimi\Pipe\Models;
 
+/**
+ * Fikrimi\Pipe\Models\Build
+ *
+ * @property string $id
+ * @property string $project_id
+ * @property string $invoker
+ * @property int $status
+ * @property array $meta
+ * @property array $meta_steps
+ * @property array $meta_project
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read mixed $status_name
+ * @property-read \Fikrimi\Pipe\Models\Project $project
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Fikrimi\Pipe\Models\Step[] $steps
+ * @property-read int|null $steps_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereInvoker($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMeta($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMetaProject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMetaSteps($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereProjectId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Build extends BaseModel
 {
     public const S_PROVISIONING = 0;
