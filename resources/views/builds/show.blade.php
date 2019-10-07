@@ -10,13 +10,16 @@
         <h1 class="h3 mb-0 text-gray-800">PROJECT {{ strtoupper($project->name) }}</h1>
     </div>
     <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow mb-4" style="border-right: 5px solid #1cc88a">
+        <div class="col-sm-12 m-b-30">
+            <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Executing Code
-                        <i class="fas fa-check-circle float-right text-success"></i>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Build Details
                     </h6>
                 </div>
+                @include('pipe::partials.project_header')
+            </div>
+        </div>
         <div class="col-md-6">
             @foreach ($stepGroups as $group => $steps)
                 @continue((explode('-', $group)[0] ?? '') === 'pipe')
@@ -25,22 +28,22 @@
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">{{ $group }}</h6>
                     </div>
-                <div class="card-body">
-                    <ul class="list-group">
+                    <div class="card-body">
+                        <ul class="list-group">
                             @foreach ($steps as $step)
                                 <li class="list-group-item">{{ $step->command }}
                                     @if ($step->exit_status === null)
                                         <i class="fas fa-spin fa-circle-notch float-right text-muted"></i>
                                     @elseif ($step->exit_status === 0)
                                         <i class="fas fa-check-circle float-right text-success"></i>
-                                @else
+                                    @else
                                         <i class="fas fa-times-circle float-right text-danger"></i>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
             @endforeach
         </div>

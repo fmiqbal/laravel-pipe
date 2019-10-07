@@ -45,11 +45,15 @@ class BuildController extends Controller
         return back();
     }
 
-    public function show(Project $project, Build $build)
+    public function show(Build $build)
     {
+        $stepGroups = $build->steps->groupBy('group');
+        $project = Project::make($build->meta_project);
+
         return view('pipe::builds.show')->with([
             'project' => $project,
             'build'   => $build,
+            'stepGroups'   => $stepGroups,
         ]);
     }
 
