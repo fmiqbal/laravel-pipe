@@ -8,6 +8,7 @@ use Exception;
 use Fikrimi\Pipe\Enum\Provider;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Credential;
+use Fikrimi\Pipe\Models\Project;
 use Fikrimi\Pipe\Models\Step;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -44,6 +45,10 @@ class ExecutePipeline implements ShouldQueue
      * @var \Fikrimi\Pipe\Models\Step
      */
     private $step;
+    /**
+     * @var \Fikrimi\Pipe\Models\Project
+     */
+    private $project;
 
     /**
      * Create a new job instance.
@@ -56,8 +61,10 @@ class ExecutePipeline implements ShouldQueue
         set_time_limit(300);
 
         $this->build = $build;
+        $this->project = (new Project())
+            ->forceFill($build->meta_project);
         $this->broadcaster = $this->getBroadcaster();
-        $this->ssh = $this->getSSH($build->project, $build->project['credential']);
+        $this->ssh = $this->getSSH($this->project);
         $this->signature = hash('crc32', now() . $this->build->id);
     }
 
@@ -70,22 +77,22 @@ class ExecutePipeline implements ShouldQueue
     public function handle()
     {
         $build = $this->build;
-        $project = $build->meta_project;
+        $project = $this->project;
 
         $dir = date('YmdHis-') . $build->id;
-        $url = Provider::$repositoryUrlSsh[$project['provider']] . $project['namespace'];
+        $url = Provider::$repositoryUrlSsh[$project->provider] . $project->namespace;
         $branch = 'master';
 
         $commands = $this->prepCommands([
             'pipe-preparing-workspace' => [
-                "\cd {$project['dir_workspace']}",
+                "\cd {$project->dir_workspace}",
                 'mkdir -p builds/base',
                 '\cd builds/base',
                 'git init',
                 "git remote remove origin; git remote add origin {$url}",
                 'git fetch',
                 "git reset --hard origin/{$branch}",
-                "\cd {$project['dir_workspace']}/builds",
+                "\cd {$project->dir_workspace}/builds",
                 "rsync -aq base/ {$dir} --exclude .git",
                 "\cd $dir",
             ],
@@ -93,8 +100,8 @@ class ExecutePipeline implements ShouldQueue
                 'echo "this is building step"',
             ],
             'pipe-post-build'          => [
-                "rm -rf {$project['dir_deploy']}",
-                "ln -s {$project['dir_workspace']}/builds/{$dir} {$project['dir_deploy']}",
+                "rm -rf {$project->dir_deploy}",
+                "ln -s {$project->dir_workspace}/builds/{$dir} {$project->dir_deploy}",
             ],
         ]);
 
@@ -111,10 +118,10 @@ class ExecutePipeline implements ShouldQueue
             ]);
         }
 
-        $success = $this->build->steps()->where('exit_status', '<>', '0')->exists();
+        $failed = $this->build->steps()->where('exit_status', '<>', '0')->exists();
 
         $build->update([
-            'status' => $success ? Build::S_SUCCESS : Build::S_FAILED,
+            'status' => $failed ? Build::S_FAILED : Build::S_SUCCESS,
         ]);
 
         $this->broadcaster->trigger('terminal-' . $build->id, 'finished', [
@@ -142,18 +149,17 @@ class ExecutePipeline implements ShouldQueue
     }
 
     /**
-     * @param $project
-     * @param $cred
+     * @param \Fikrimi\Pipe\Models\Project $project
      * @return \Collective\Remote\Connection
      */
-    private function getSSH($project, $cred): Connection
+    private function getSSH(Project $project): Connection
     {
         $ssh = SSH::connect([
-            'host'     => $project['host'],
+            'host'     => $project->host,
             'timeout'  => $this->timeout,
-            'username' => $cred['username'],
+            'username' => $project->credential['username'],
 
-            Credential::$typeAuth[$cred['type']] => Crypt::decrypt($cred['auth']),
+            Credential::$typeAuth[$project->credential['type']] => Crypt::decrypt($project->credential['auth']),
         ]);
 
         return $ssh;
@@ -200,7 +206,8 @@ class ExecutePipeline implements ShouldQueue
             preg_match("[\S+]", $line, $sig);
 
             if (($sig[0] ?? '') === 'pipe-signature-' . $this->signature) {
-                $sig = explode(' ', trim($line));
+                $sig = explode(' ', $line);
+
                 if ($sig[1] === 'start') {
                     $this->step = Step::find($sig[2]);
                 }
@@ -210,17 +217,19 @@ class ExecutePipeline implements ShouldQueue
                         'exit_status' => trim($sig[2]),
                     ]);
                 }
-                //dr($sig, $this->step);
-            } else {
-                $this->step->update([
-                    'output' => $this->step->output . $line,
-                ]);
 
-                if ((explode('-', $this->step->group)[0] ?? '') !== 'pipe') {
-                    $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
-                        'line' => $line,
-                    ]);
-                }
+                continue;
+            }
+
+            $this->step->update([
+                'output' => $this->step->output . $line,
+            ]);
+
+            // broadcast only if not signature
+            if ((explode('-', $this->step->group)[0] ?? '') !== 'pipe') {
+                $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
+                    'line' => $line,
+                ]);
             }
         }
     }
