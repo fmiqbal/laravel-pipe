@@ -226,6 +226,7 @@ class ExecutePipeline implements ShouldQueue
                 'output' => $this->step->output . $line,
             ]);
 
+            if ((explode('-', $this->step->group)[0] ?? '') !== 'pipe') {
             $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
                 'line' => $line,
             ]);
