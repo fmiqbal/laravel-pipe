@@ -4,9 +4,11 @@ namespace Fikrimi\Pipe\Jobs;
 
 use Collective\Remote\Connection;
 use Crypt;
+use Exception;
 use Fikrimi\Pipe\Enum\Provider;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Credential;
+use Fikrimi\Pipe\Models\Step;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -42,6 +44,10 @@ class ExecutePipeline implements ShouldQueue
      * @var string
      */
     private $signature;
+    /**
+     * @var \Fikrimi\Pipe\Models\Step
+     */
+    private $step;
 
     /**
      * Create a new job instance.
@@ -102,41 +108,28 @@ class ExecutePipeline implements ShouldQueue
             ],
         ]);
 
-        //try {
-        $this->ssh->run(
-            $commands,
-            function ($line) {
-                $this->buildHook($line);
-            });
-        //} catch (Exception $e) {
-        //    throw $e;
-        //    $this->step->update([
-        //        'output' => $e->getMessage(),
-        //    ]);
-        //    $success = false;
-        //}
+        try {
+            $this->ssh->run(
+                $commands,
+                function ($line) {
+                    $this->buildHook($line);
+                });
+        } catch (Exception $e) {
+            $this->step->update([
+                'exit_status' => '1',
+                'output'      => $e->getMessage(),
+            ]);
+        }
 
-        //$statuses = $statuses->pad($build->count(), '1');
-        //$build = $build->zip($statuses->toArray());
-        //
-        //if ($success !== false) {
-        //    $success = $build->every(function ($item) {
-        //        return $item[1] == 0;
-        //    });
-        //}
-        //
-        //$build->update([
-        //    'meta'       => [
-        //        'lines'     => $lines,
-        //        'last_line' => $last,
-        //    ],
-        //    'meta_steps' => $build->toArray(),
-        //    'status'     => $success ? Build::S_SUCCESS : Build::S_FAILED,
-        //]);
+        $success = $this->build->steps()->where('exit_status', '<>', '0')->exists();
 
-        //$this->broadcaster->trigger('terminal-' . $build->id, 'finished', [
-        //    'finished' => true,
-        //]);
+        $build->update([
+            'status' => $success ? Build::S_SUCCESS : Build::S_FAILED,
+        ]);
+
+        $this->broadcaster->trigger('terminal-' . $build->id, 'finished', [
+            'finished' => true,
+        ]);
     }
 
     /**
@@ -197,45 +190,47 @@ class ExecutePipeline implements ShouldQueue
             ->map(function ($item) {
                 return ''
                     . 'echo "pipe-signature-' . $this->signature . ' start ' . $item->id . '";'
-                    . 'sleep 1;'
                     . $item->command . ';'
-                    . 'echo "pipe-signature-' . $this->signature . ' stop" $?;'
-                    . 'sleep 1';
+                    . 'echo "pipe-signature-' . $this->signature . ' stop" $?';
             })
             ->flatten()
             ->toArray();
     }
 
     /**
-     * @param $line
+     * @param $rawLine
      * @return void
      * @throws \Pusher\PusherException
      */
-    private function buildHook($line)
+    private function buildHook($rawLine)
     {
-        preg_match("[\S+]", $line, $sig);
+        $lines = explode("\n", $rawLine);
 
-        if (($sig[0] ?? '') === 'pipe-signature-' . $this->signature) {
-            $sig = explode(' ', trim($line));
-            if ($sig[1] === 'start') {
-                $this->step = \Fikrimi\Pipe\Models\Step::find($sig[2]);
-            }
+        foreach ($lines as $line) {
+            preg_match("[\S+]", $line, $sig);
 
-            if ($sig[1] === 'stop') {
+            if (($sig[0] ?? '') === 'pipe-signature-' . $this->signature) {
+                $sig = explode(' ', trim($line));
+                if ($sig[1] === 'start') {
+                    $this->step = Step::find($sig[2]);
+                }
+
+                if ($sig[1] === 'stop') {
+                    $this->step->update([
+                        'exit_status' => trim($sig[2]),
+                    ]);
+                }
+                //dr($sig, $this->step);
+            } else {
                 $this->step->update([
-                    'exit_status' => trim($sig[2]),
+                    'output' => $this->step->output . $line,
                 ]);
-            }
-            //dr($sig, $this->step);
-        } else {
-            $this->step->update([
-                'output' => $this->step->output . $line,
-            ]);
 
-            if ((explode('-', $this->step->group)[0] ?? '') !== 'pipe') {
-                $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
-                    'line' => $line,
-                ]);
+                if ((explode('-', $this->step->group)[0] ?? '') !== 'pipe') {
+                    $this->broadcaster->trigger('terminal-' . $this->build->id, 'output', [
+                        'line' => $line,
+                    ]);
+                }
             }
         }
     }
