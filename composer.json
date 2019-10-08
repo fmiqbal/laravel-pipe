@@ -12,6 +12,7 @@
         "illuminate/support": "^6",
         "laravelcollective/remote": "^6",
         "pusher/pusher-php-server": "^4.0",
+        "phpseclib/phpseclib": "*",
         "ext-sodium": "*"
     },
     "autoload": {

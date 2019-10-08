@@ -39,6 +39,7 @@ class Build extends BaseModel
     public const S_SUCCESS = 2;
     public const S_FAILED = 3;
     public const S_TERMINATED = 4;
+    public const S_PENDING_TERM = 5;
 
     public static $statusNames = [
         self::S_PROVISIONING => 'provisioning',
@@ -46,6 +47,7 @@ class Build extends BaseModel
         self::S_SUCCESS      => 'success',
         self::S_FAILED       => 'failed',
         self::S_TERMINATED   => 'terminated',
+        self::S_PENDING_TERM => 'pending termination',
     ];
     public $incrementing = false;
     protected $casts = [
@@ -63,11 +65,17 @@ class Build extends BaseModel
         ];
     }
 
+    public function getCacheKey($for)
+    {
+        return "pipe-cache-build-$for-{$this->id}";
+    }
+
     //public function getMetaProjectObjAttribute()
     //{
     //    return json_encode(j)
     //}
     //
+
     public function getStatusNameAttribute()
     {
         return self::$statusNames[$this->status];

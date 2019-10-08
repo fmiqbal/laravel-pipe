@@ -2,10 +2,11 @@
 
 namespace Fikrimi\Pipe\Jobs;
 
-use Collective\Remote\Connection;
+use Cache;
 use Crypt;
 use Exception;
 use Fikrimi\Pipe\Enum\Provider;
+use Fikrimi\Pipe\Exceptions\TerminationException;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
@@ -16,8 +17,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
+use phpseclib\Crypt\RSA;
+use phpseclib\Net\SSH2;
 use Pusher\Pusher;
-use SSH;
 
 class ExecutePipeline implements ShouldQueue
 {
@@ -29,10 +31,6 @@ class ExecutePipeline implements ShouldQueue
      * @var \Fikrimi\Pipe\Models\Project
      */
     private $build;
-    /**
-     * @var \Collective\Remote\Connection
-     */
-    private $ssh;
     /**
      * @var \Pusher\Pusher
      */
@@ -49,6 +47,7 @@ class ExecutePipeline implements ShouldQueue
      * @var \Fikrimi\Pipe\Models\Project
      */
     private $project;
+    private $status;
 
     /**
      * Create a new job instance.
@@ -64,7 +63,6 @@ class ExecutePipeline implements ShouldQueue
         $this->project = (new Project())
             ->forceFill($build->meta_project);
         $this->broadcaster = $this->getBroadcaster();
-        $this->ssh = $this->getSSH($this->project);
         $this->signature = hash('crc32', now() . $this->build->id);
     }
 
@@ -76,23 +74,21 @@ class ExecutePipeline implements ShouldQueue
      */
     public function handle()
     {
-        $build = $this->build;
-        $project = $this->project;
+        $dir = date('YmdHis-') . $this->build->id;
+        $url = Provider::$repositoryUrlSsh[$this->project->provider] . $this->project->namespace;
 
-        $dir = date('YmdHis-') . $build->id;
-        $url = Provider::$repositoryUrlSsh[$project->provider] . $project->namespace;
         $branch = 'master';
 
         $commands = $this->prepCommands([
             'pipe-preparing-workspace' => [
-                "\cd {$project->dir_workspace}",
+                "\cd {$this->project->dir_workspace}",
                 'mkdir -p builds/base',
                 '\cd builds/base',
                 'git init',
                 "git remote remove origin; git remote add origin {$url}",
                 'git fetch',
                 "git reset --hard origin/{$branch}",
-                "\cd {$project->dir_workspace}/builds",
+                "\cd {$this->project->dir_workspace}/builds",
                 "rsync -aq base/ {$dir} --exclude .git",
                 "\cd $dir",
             ],
@@ -100,31 +96,46 @@ class ExecutePipeline implements ShouldQueue
                 'echo "this is building step"',
             ],
             'pipe-post-build'          => [
-                "rm -rf {$project->dir_deploy}",
-                "ln -s {$project->dir_workspace}/builds/{$dir} {$project->dir_deploy}",
+                "rm -rf {$this->project->dir_deploy}",
+                "ln -s {$this->project->dir_workspace}/builds/{$dir} {$this->project->dir_deploy}",
             ],
         ]);
 
+        $ssh = $this->getSSH($this->project);
         try {
-            $this->ssh->run(
-                $commands,
-                function ($line) {
+            $ssh->exec(
+                implode(' && ', $commands),
+                function ($line) use ($ssh) {
                     $this->buildHook($line);
+
+                    if ((int) Cache::get($this->build->getCacheKey('status')) === Build::S_PENDING_TERM) {
+                        $ssh->_close_channel(SSH2::CHANNEL_EXEC);
+                        throw new TerminationException('Terminated by user');
+                    }
                 });
         } catch (Exception $e) {
-            $this->step->update([
-                'exit_status' => '1',
-                'output'      => $e->getMessage(),
+            $this->build->update([
+                'errors' => $e->getMessage(),
+            ]);
+
+            $this->build->steps()->whereNull('exit_status')->update([
+                'exit_status' => 1,
+            ]);
+
+            $this->build->update([
+                'status' => $e instanceof TerminationException ? Build::S_TERMINATED : Build::S_FAILED,
             ]);
         }
 
-        $failed = $this->build->steps()->where('exit_status', '<>', '0')->exists();
+        if (! isset($e)) {
+            $failed = $this->build->steps()->where('exit_status', '<>', '0')->exists();
 
-        $build->update([
-            'status' => $failed ? Build::S_FAILED : Build::S_SUCCESS,
-        ]);
+            $this->build->update([
+                'status' => $failed ? Build::S_FAILED : Build::S_SUCCESS,
+            ]);
+        }
 
-        $this->broadcaster->trigger('terminal-' . $build->id, 'finished', [
+        $this->broadcaster->trigger('terminal-' . $this->build->id, 'finished', [
             'finished' => true,
         ]);
     }
@@ -150,17 +161,18 @@ class ExecutePipeline implements ShouldQueue
 
     /**
      * @param \Fikrimi\Pipe\Models\Project $project
-     * @return \Collective\Remote\Connection
+     * @return \phpseclib\Net\SSH2
      */
-    private function getSSH(Project $project): Connection
+    private function getSSH(Project $project)
     {
-        $ssh = SSH::connect([
-            'host'     => $project->host,
-            'timeout'  => $this->timeout,
-            'username' => $project->credential['username'],
+        $ssh = new SSH2($project->host);
+        $auth = Crypt::decrypt($project->credential->auth);
 
-            Credential::$typeAuth[$project->credential['type']] => Crypt::decrypt($project->credential['auth']),
-        ]);
+        if (Credential::T_KEY) {
+            $auth = (new RSA())->loadKey($auth);
+        }
+
+        $ssh->login($project->credential->username, $auth);
 
         return $ssh;
     }
@@ -189,7 +201,6 @@ class ExecutePipeline implements ShouldQueue
                     . $item->command . ';'
                     . 'echo "pipe-signature-' . $this->signature . ' stop" $?';
             })
-            ->flatten()
             ->toArray();
     }
 

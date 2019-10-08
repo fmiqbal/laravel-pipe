@@ -23,13 +23,14 @@ class BuildController extends Controller
     public function build(Request $request, Project $project, Build $build)
     {
         try {
+            $invoker = $request->wantsJson() ? 'webhook' : 'manual';
+
             \DB::beginTransaction();
-            $project->load('credential');
             $build->fill([
                 'id'           => Str::orderedUuid(),
                 'status'       => Build::S_PROVISIONING,
                 'meta_project' => $project->toArray(),
-                'invoker'      => 'manual',
+                'invoker'      => $invoker,
             ]);
 
             $project->builds()->save($build);
@@ -50,9 +51,9 @@ class BuildController extends Controller
         $project = Project::make($build->meta_project);
 
         return view('pipe::builds.show')->with([
-            'project' => $project,
-            'build'   => $build,
-            'stepGroups'   => $stepGroups,
+            'project'    => $project,
+            'build'      => $build,
+            'stepGroups' => $stepGroups,
         ]);
     }
 
@@ -62,8 +63,14 @@ class BuildController extends Controller
             return back();
         }
 
+        \Cache::put(
+            $build->getCacheKey('status'),
+            Build::S_PENDING_TERM,
+            300
+        );
+
         $build->update([
-            'status' => Build::S_TERMINATED,
+            'status' => Build::S_PENDING_TERM,
         ]);
 
         return back();
