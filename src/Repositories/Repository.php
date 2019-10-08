@@ -12,10 +12,28 @@ abstract class Repository implements RepositoryInterface
      */
     protected $model;
     protected $name;
+    protected $columns;
 
     public function __construct()
     {
         $this->setModel(new static::$modelName);
+
+        $this->columns = \Schema::getColumnListing($this->model->getTable());
+    }
+
+    public function __isset($name)
+    {
+        return $this->__get($name) ? true : false;
+    }
+
+    public function __get($name)
+    {
+        return $this->model->$name ?? null;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->model->$name = $value;
     }
 
     public function fill($attr)
@@ -36,13 +54,6 @@ abstract class Repository implements RepositoryInterface
     public function setModel(\Illuminate\Database\Eloquent\Model $model)
     {
         $this->model = $model;
-
-        return $this;
-    }
-
-    public function fresh()
-    {
-        $this->setModel(new static::$modelName);
 
         return $this;
     }

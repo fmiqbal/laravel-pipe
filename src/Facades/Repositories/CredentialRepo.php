@@ -6,6 +6,6 @@ class CredentialRepo extends \Illuminate\Support\Facades\Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'CredentialRepo';
+        return new \Fikrimi\Pipe\Repositories\CredentialRepo();
     }
 }

@@ -10,8 +10,6 @@ interface RepositoryInterface
 
     public function fill($attr);
 
-    public function fresh();
-
     public function fromArray($array);
 
     public function store(array $array = []);

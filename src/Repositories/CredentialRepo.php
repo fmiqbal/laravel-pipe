@@ -32,7 +32,7 @@ class CredentialRepo extends Repository
 
         $this->model->save();
 
-        return $this->model;
+        return $this;
     }
 
     /**

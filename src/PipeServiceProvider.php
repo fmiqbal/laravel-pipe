@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe;
 
-use App;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
 class PipeServiceProvider extends ServiceProvider
@@ -17,9 +17,14 @@ class PipeServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'pipe');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->publishes([
-            __DIR__ . '/../config/pipe.php'   => config_path() . '/pipe.php',
+            __DIR__ . '/../config/pipe.php'        => config_path() . '/pipe.php',
             __DIR__ . '/../resources/views/assets' => public_path('pipe-assets'),
         ], 'pipe');
+
+        $this->app->booting(function () {
+            $loader = AliasLoader::getInstance();
+            $loader->alias('CredentialRepo', \Fikrimi\Pipe\Facades\Repositories\CredentialRepo::class);
+        });
     }
 
     /**
@@ -29,14 +34,6 @@ class PipeServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $repositories = [
-            'CredentialRepo' => \Fikrimi\Pipe\Repositories\CredentialRepo::class,
-        ];
-
-        foreach ($repositories as $name => $class) {
-            App::bind($name, function () use ($class) {
-                return new $class();
-            });
-        }
+        //
     }
 }
