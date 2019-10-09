@@ -227,6 +227,10 @@ class ExecutePipeline implements ShouldQueue
                     $this->step->update([
                         'exit_status' => trim($sig[2]),
                     ]);
+
+                    if (trim($sig[2]) != 0) {
+                        throw new \Fikrimi\Pipe\Exceptions\ApplicationException($line);
+                    }
                 }
 
                 continue;
