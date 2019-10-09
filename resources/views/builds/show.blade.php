@@ -2,9 +2,6 @@
 
 @section('content')
     <input type="hidden" name="build-id" value="{{ $build->id }}">
-    @if ($build->status === \Fikrimi\Pipe\Models\Build::S_FAILED)
-        <div class="alert alert-danger">Last Line : {{ $build->meta['last_line'] ?? '' }}</div>
-    @endif
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">PROJECT {{ strtoupper($project->name) }}</h1>
@@ -21,6 +18,26 @@
             </div>
         </div>
         <div class="col-md-6">
+            @if ($build->status === \Fikrimi\Pipe\Models\Build::S_FAILED)
+                <div class="card shadow mb-4" style="border-right: 5px solid #e74a3b">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Errors</h6>
+                    </div>
+                    <div class="card-body">
+                        {{--<ul class="list-group">--}}
+                            @foreach ($build->steps()->where('exit_status', '<>', 0)->get() as $step)
+                                @continue($step->output === null)
+                                {{--<li class="list-group-item">--}}
+                                    {{ $step->command }}
+                                    <br>
+                                    {{ $step->output }}
+                                    <hr>
+                                {{--</li>--}}
+                            @endforeach
+                        {{--</ul>--}}
+                    </div>
+                </div>
+            @endif
             @foreach ($stepGroups as $group => $steps)
                 @continue((explode('-', $group)[0] ?? '') === 'pipe')
 
@@ -29,22 +46,29 @@
                         <h6 class="m-0 font-weight-bold text-primary">{{ $group }}</h6>
                     </div>
                     <div class="card-body">
-                        <ul class="list-group">
+                        {{--<ul class="list-group">--}}
                             @foreach ($steps as $step)
-                                <li class="list-group-item">{{ $step->command }}
-                                    @if ($step->exit_status === null)
-                                        <i class="fas fa-spin fa-circle-notch float-right text-muted"></i>
-                                    @elseif ($step->exit_status === 0)
-                                        <i class="fas fa-check-circle float-right text-success"></i>
-                                    @else
-                                        <i class="fas fa-times-circle float-right text-danger"></i>
-                                    @endif
-                                </li>
+                                {{--<li class="list-group-item">--}}
+                                    <div class="row">
+                                        <div class="col-sm-10">
+                                            {{ $step->command }}
+                                        </div>
+                                        <div class="col-sm-2 text-right">
+                                            @if ($step->exit_status === null)
+                                                <i class="fas fa-spin fa-circle-notch text-muted"></i>
+                                            @elseif ($step->exit_status === 0)
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            @else
+                                                <i class="fas fa-times-circle text-danger"></i>
+                                            @endif
+                                        </div>
+                                    </div>
+                                {{--</li>--}}
+                            <hr>
                             @endforeach
-                        </ul>
+                        {{--</ul>--}}
                     </div>
                 </div>
-
             @endforeach
         </div>
         <div class="col-md-6">
