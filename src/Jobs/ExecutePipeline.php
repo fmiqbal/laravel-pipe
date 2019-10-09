@@ -74,7 +74,8 @@ class ExecutePipeline implements ShouldQueue
      */
     public function handle()
     {
-        $dir = date('YmdHis-') . $this->build->id;
+        $workspaceDir = 'projects-' . $this->build->project->id;
+        $buildDir = date('YmdHis-') . $this->build->id;
         $url = Provider::$repositoryUrlSsh[$this->project->provider] . $this->project->namespace;
 
         $branch = 'master';
@@ -82,22 +83,22 @@ class ExecutePipeline implements ShouldQueue
         $commands = $this->prepCommands([
             'pipe-preparing-workspace' => [
                 "\cd {$this->project->dir_workspace}",
-                'mkdir -p builds/base',
-                '\cd builds/base',
+                "\mkdir -p {$workspaceDir}/base",
+                "\cd {$workspaceDir}/base",
                 'git init',
                 "git remote remove origin; git remote add origin {$url}",
                 'git fetch',
                 "git reset --hard origin/{$branch}",
-                "\cd {$this->project->dir_workspace}/builds",
-                "rsync -aq base/ {$dir} --exclude .git",
-                "\cd $dir",
+                "\cd ..",
+                "\\rsync -aq base/ {$buildDir} --exclude .git",
+                "\cd $buildDir",
             ],
             'build'                    => [
                 'echo "this is building step"',
             ],
             'pipe-post-build'          => [
-                "rm -rf {$this->project->dir_deploy}",
-                "ln -s {$this->project->dir_workspace}/builds/{$dir} {$this->project->dir_deploy}",
+                "\\rm -rf {$this->project->dir_deploy}",
+                "\ln -s {$this->project->dir_workspace}/{$workspaceDir}/{$buildDir} {$this->project->dir_deploy}",
             ],
         ]);
 
