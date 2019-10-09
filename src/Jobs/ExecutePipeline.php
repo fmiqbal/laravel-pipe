@@ -105,15 +105,16 @@ class ExecutePipeline implements ShouldQueue
         try {
             $ssh->exec(
                 implode(' && ', $commands),
-                function ($line) use ($ssh) {
+                function ($line) {
                     $this->buildHook($line);
 
                     if ((int) Cache::get($this->build->getCacheKey('status')) === Build::S_PENDING_TERM) {
-                        $ssh->_close_channel(SSH2::CHANNEL_EXEC);
                         throw new TerminationException('Terminated by user');
                     }
                 });
         } catch (Exception $e) {
+            $ssh->_close_channel(SSH2::CHANNEL_EXEC);
+
             $this->build->update([
                 'errors' => $e->getMessage(),
             ]);
