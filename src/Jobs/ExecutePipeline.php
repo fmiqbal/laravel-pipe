@@ -172,6 +172,7 @@ class ExecutePipeline implements ShouldQueue
             $auth = (new RSA())->loadKey($auth);
         }
 
+        $ssh->setTimeout(300);
         $ssh->login($project->credential->username, $auth);
 
         return $ssh;
