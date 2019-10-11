@@ -93,9 +93,7 @@ class ExecutePipeline implements ShouldQueue
                 "\\rsync -aq base/ {$buildDir} --exclude .git",
                 "\cd $buildDir",
             ],
-            'build'                    => [
-                'echo "this is building step"',
-            ],
+            'build'                    => $this->project->commands,
             'pipe-post-build'          => [
                 "\\rm -rf {$this->project->dir_deploy}",
                 "\ln -s {$this->project->dir_workspace}/{$workspaceDir}/{$buildDir} {$this->project->dir_deploy}",
@@ -104,6 +102,10 @@ class ExecutePipeline implements ShouldQueue
 
         $ssh = $this->getSSH($this->project);
         try {
+            $this->build->update([
+                'status' => Build::S_RUNNING
+            ]);
+
             $ssh->exec(
                 implode(' && ', $commands),
                 function ($line) {
