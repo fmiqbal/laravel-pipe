@@ -25,8 +25,6 @@ class ExecutePipeline implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 300;
-
     /**
      * @var \Fikrimi\Pipe\Models\Project
      */
@@ -48,6 +46,10 @@ class ExecutePipeline implements ShouldQueue
      */
     private $project;
     private $status;
+    /**
+     * @var bool
+     */
+    public $timeout = 600;
 
     /**
      * Create a new job instance.
@@ -57,13 +59,15 @@ class ExecutePipeline implements ShouldQueue
      */
     public function __construct(Build $build)
     {
-        set_time_limit(300);
-
         $this->build = $build;
         $this->project = (new Project())
             ->forceFill($build->meta_project);
+
         $this->broadcaster = $this->getBroadcaster();
         $this->signature = hash('crc32', now() . $this->build->id);
+
+        $this->timeout = $this->project->timeout;
+        set_time_limit($this->project->timeout);
     }
 
     /**
@@ -103,7 +107,8 @@ class ExecutePipeline implements ShouldQueue
         $ssh = $this->getSSH($this->project);
         try {
             $this->build->update([
-                'status' => Build::S_RUNNING
+                'status'     => Build::S_RUNNING,
+                'started_at' => \Carbon\Carbon::now(),
             ]);
 
             $ssh->exec(
@@ -119,15 +124,13 @@ class ExecutePipeline implements ShouldQueue
             $ssh->_close_channel(SSH2::CHANNEL_EXEC);
 
             $this->build->update([
-                'errors' => $e->getMessage(),
+                'errors'     => $e->getMessage(),
+                'status'     => $e instanceof TerminationException ? Build::S_TERMINATED : Build::S_FAILED,
+                'stopped_at' => \Carbon\Carbon::now(),
             ]);
 
             $this->build->steps()->whereNull('exit_status')->update([
                 'exit_status' => 1,
-            ]);
-
-            $this->build->update([
-                'status' => $e instanceof TerminationException ? Build::S_TERMINATED : Build::S_FAILED,
             ]);
         }
 
@@ -135,7 +138,8 @@ class ExecutePipeline implements ShouldQueue
             $failed = $this->build->steps()->where('exit_status', '<>', '0')->exists();
 
             $this->build->update([
-                'status' => $failed ? Build::S_FAILED : Build::S_SUCCESS,
+                'status'     => $failed ? Build::S_FAILED : Build::S_SUCCESS,
+                'stopped_at' => \Carbon\Carbon::now(),
             ]);
         }
 
@@ -176,7 +180,7 @@ class ExecutePipeline implements ShouldQueue
             $auth = (new RSA())->loadKey($auth);
         }
 
-        $ssh->setTimeout(300);
+        $ssh->setTimeout($this->project->timeout);
         $ssh->login($project->credential->username, $auth);
 
         return $ssh;

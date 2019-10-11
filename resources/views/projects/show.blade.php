@@ -44,6 +44,9 @@
                         </thead>
                         <tbody>
                         @foreach ($project->builds()->latest()->get() as $build)
+                            @php
+                                $build->checkTimeOut();
+                            @endphp
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $build->created_at  }}</td>

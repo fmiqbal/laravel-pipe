@@ -19,6 +19,8 @@ class CreateBuildsTable extends Migration
             $table->string('invoker');
             $table->char('status');
             $table->text('errors')->nullable();
+            $table->dateTime('started_at')->nullable();
+            $table->dateTime('stopped_at')->nullable();
             $table->json('meta_project');
             $table->timestamps();
 

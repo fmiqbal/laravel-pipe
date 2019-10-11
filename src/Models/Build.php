@@ -57,6 +57,10 @@ class Build extends BaseModel
         'meta_project' => 'json',
     ];
     protected $guarded = [];
+    protected $dates = [
+        'started_at',
+        'stopped_at',
+    ];
 
     public static function getFinishStatuses()
     {
@@ -89,5 +93,15 @@ class Build extends BaseModel
     public function steps()
     {
         return $this->hasMany(Step::class);
+    }
+
+    public function checkTimeOut()
+    {
+        if ($this->status === self::S_RUNNING && \Carbon\Carbon::now() > $this->started_at) {
+            $this->update([
+                'status' => self::S_FAILED,
+                'stopped_at' => $this->started_at->addSeconds($this->project->timeout)
+            ]);
+        }
     }
 }
