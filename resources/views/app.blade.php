@@ -54,6 +54,11 @@
                 <span>Credentials</span></a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('pipe.stacks.index') }}">
+                <i class="fas fa-fw fa-stream"></i>
+                <span>Stacks</span></a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{{ route('pipe.projects.index') }}">
                 <i class="fas fa-fw fa-chart-area"></i>
                 <span>Projects</span></a>

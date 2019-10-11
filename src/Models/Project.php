@@ -39,6 +39,9 @@ class Project extends BaseModel
 {
     public $incrementing = false;
     protected $guarded = [];
+    protected $casts = [
+        'commands' => 'json'
+    ];
 
     public function credential()
     {

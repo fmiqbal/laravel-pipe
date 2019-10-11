@@ -50,6 +50,7 @@ class RouteRegistrar
             ]);
             $router->resource('projects', 'ProjectController');
             $router->resource('credentials', 'CredentialController');
+            $router->resource('stacks', 'StackController');
 
             $router->post('webhook/{project}', [
                 'uses' => 'BuildController@build',
