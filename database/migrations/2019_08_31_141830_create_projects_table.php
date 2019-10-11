@@ -21,6 +21,7 @@ class CreateProjectsTable extends Migration
             $table->string('host');
             $table->string('dir_deploy');
             $table->string('dir_workspace');
+            $table->json('commands');
             $table->text('namespace');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
