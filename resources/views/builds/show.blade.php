@@ -24,6 +24,7 @@
                         <h6 class="m-0 font-weight-bold text-primary">Errors</h6>
                     </div>
                     <div class="card-body">
+                                    {{ $build->errors }}
                         {{--<ul class="list-group">--}}
                             @foreach ($build->steps()->where('exit_status', '<>', 0)->get() as $step)
                                 @continue($step->output === null)

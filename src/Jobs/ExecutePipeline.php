@@ -104,8 +104,8 @@ class ExecutePipeline implements ShouldQueue
             ],
         ]);
 
-        $ssh = $this->getSSH($this->project);
         try {
+	    $ssh = $this->getSSH($this->project);
             $this->build->update([
                 'status'     => Build::S_RUNNING,
                 'started_at' => \Carbon\Carbon::now(),
@@ -121,7 +121,7 @@ class ExecutePipeline implements ShouldQueue
                     }
                 });
         } catch (Exception $e) {
-            $ssh->_close_channel(SSH2::CHANNEL_EXEC);
+            ($ssh ?? false) && $ssh->_close_channel(SSH2::CHANNEL_EXEC);
 
             $this->build->update([
                 'errors'     => $e->getMessage(),
@@ -181,7 +181,11 @@ class ExecutePipeline implements ShouldQueue
         }
 
         $ssh->setTimeout($this->project->timeout);
-        $ssh->login($project->credential->username, $auth);
+        $login = $ssh->login($project->credential->username, $auth);
+
+	if (! $login) {
+		throw new \Exception('Login Failed');
+	}
 
         return $ssh;
     }
