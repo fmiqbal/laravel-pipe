@@ -3,12 +3,15 @@
 namespace Fikrimi\Pipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 use Str;
 
 class ProjectController extends Controller
 {
+    use HasPolicy;
+
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +19,13 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return view('pipe::projects.index');
+        $projects = Project::query();
+
+        $this->checkModelCreator('view_other', $projects);
+
+        return view('pipe::projects.index')->with([
+            'projects' => $projects->get(),
+        ]);
     }
 
     /**
@@ -59,9 +68,12 @@ class ProjectController extends Controller
      *
      * @param \Fikrimi\Pipe\Models\Project $project
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function show(Project $project)
     {
+        $this->authorize('view', $project);
+
         return view('pipe::projects.show')->with([
             'project' => $project,
         ]);
@@ -99,6 +111,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        $this->authorize('delete', $project);
+
         $project->delete();
 
         return redirect()->back();

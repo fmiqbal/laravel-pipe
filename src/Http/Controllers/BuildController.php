@@ -3,8 +3,11 @@
 namespace Fikrimi\Pipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Cache;
+use DB;
 use Exception;
 use Fikrimi\Pipe\Exceptions\ApplicationException;
+use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Jobs\ExecutePipeline;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Project;
@@ -13,19 +16,24 @@ use Str;
 
 class BuildController extends Controller
 {
+    use HasPolicy;
+
     /**
      * @param \Illuminate\Http\Request $request
      * @param \Fikrimi\Pipe\Models\Project $project
      * @param \Fikrimi\Pipe\Models\Build $build
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function build(Request $request, Project $project, Build $build)
     {
+        $this->authorize('build', $project);
+
         try {
             $invoker = $request->wantsJson() ? 'webhook' : 'manual';
 
-            \DB::beginTransaction();
+            DB::beginTransaction();
             $build->fill([
                 'id'           => Str::orderedUuid(),
                 'status'       => Build::S_PROVISIONING,
@@ -36,9 +44,9 @@ class BuildController extends Controller
             $project->builds()->save($build);
 
             ExecutePipeline::dispatch($build);
-            \DB::commit();
+            DB::commit();
         } catch (Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             throw new ApplicationException($e);
         }
 
@@ -63,7 +71,7 @@ class BuildController extends Controller
             return back();
         }
 
-        \Cache::put(
+        Cache::put(
             $build->getCacheKey('status'),
             Build::S_PENDING_TERM,
             300

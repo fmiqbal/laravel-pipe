@@ -13,6 +13,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         \Fikrimi\Pipe\Models\Credential::class => \Fikrimi\Pipe\Policies\CredentialPolicy::class,
+        \Fikrimi\Pipe\Models\Project::class => \Fikrimi\Pipe\Policies\ProjectPolicy::class,
     ];
 
     /**

@@ -21,15 +21,17 @@
                         <th>#</th>
                         <th>Provider</th>
                         <th>Name</th>
+                        @include('pipe::partials.table_creator_column_th')
                         <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach (\Fikrimi\Pipe\Models\Project::all() as $project)
+                    @foreach ($projects as $project)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ \Fikrimi\Pipe\Enum\Provider::$names[$project->provider] }}</td>
                             <td>{{ $project->name }}</td>
+                            @include('pipe::partials.table_creator_column_td', ['model' => $project])
                             <td>
                                 <a class="btn btn-primary btn-sm" href="{{ route('pipe.projects.show', $project) }}"><i class="fas fa-eye fa-fw"></i> Show</a>
                                 <button type="submit" form="form-delete" formaction="{{ route('pipe.projects.destroy', $project) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash fa-fw"></i> Delete</button>
