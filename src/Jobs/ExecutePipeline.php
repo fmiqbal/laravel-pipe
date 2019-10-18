@@ -3,9 +3,11 @@
 namespace Fikrimi\Pipe\Jobs;
 
 use Cache;
+use Carbon\Carbon;
 use Crypt;
 use Exception;
 use Fikrimi\Pipe\Enum\Provider;
+use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Fikrimi\Pipe\Exceptions\TerminationException;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Credential;
@@ -25,6 +27,10 @@ class ExecutePipeline implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * @var bool
+     */
+    public $timeout = 600;
     /**
      * @var \Fikrimi\Pipe\Models\Project
      */
@@ -46,10 +52,6 @@ class ExecutePipeline implements ShouldQueue
      */
     private $project;
     private $status;
-    /**
-     * @var bool
-     */
-    public $timeout = 600;
 
     /**
      * Create a new job instance.
@@ -105,10 +107,10 @@ class ExecutePipeline implements ShouldQueue
         ]);
 
         try {
-	    $ssh = $this->getSSH($this->project);
+            $ssh = $this->getSSH($this->project);
             $this->build->update([
                 'status'     => Build::S_RUNNING,
-                'started_at' => \Carbon\Carbon::now(),
+                'started_at' => Carbon::now(),
             ]);
 
             $ssh->exec(
@@ -126,7 +128,7 @@ class ExecutePipeline implements ShouldQueue
             $this->build->update([
                 'errors'     => $e->getMessage(),
                 'status'     => $e instanceof TerminationException ? Build::S_TERMINATED : Build::S_FAILED,
-                'stopped_at' => \Carbon\Carbon::now(),
+                'stopped_at' => Carbon::now(),
             ]);
 
             $this->build->steps()->whereNull('exit_status')->update([
@@ -139,7 +141,7 @@ class ExecutePipeline implements ShouldQueue
 
             $this->build->update([
                 'status'     => $failed ? Build::S_FAILED : Build::S_SUCCESS,
-                'stopped_at' => \Carbon\Carbon::now(),
+                'stopped_at' => Carbon::now(),
             ]);
         }
 
@@ -183,9 +185,9 @@ class ExecutePipeline implements ShouldQueue
         $ssh->setTimeout($this->project->timeout);
         $login = $ssh->login($project->credential->username, $auth);
 
-	if (! $login) {
-		throw new \Exception('Login Failed');
-	}
+        if (! $login) {
+            throw new Exception('Login Failed');
+        }
 
         return $ssh;
     }
@@ -242,7 +244,7 @@ class ExecutePipeline implements ShouldQueue
                     ]);
 
                     if (trim($sig[2]) != 0) {
-                        throw new \Fikrimi\Pipe\Exceptions\ApplicationException($line);
+                        throw new ApplicationException($line);
                     }
                 }
 
