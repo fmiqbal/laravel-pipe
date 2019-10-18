@@ -4,12 +4,15 @@ namespace Fikrimi\Pipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
+use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 
 class CredentialController extends Controller
 {
+    use HasPolicy;
+
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +20,13 @@ class CredentialController extends Controller
      */
     public function index()
     {
-        return view('pipe::credentials.index');
+        $credentials = Credential::query();
+
+        $this->checkModelCreator('view_other', $credentials);
+
+        return view('pipe::credentials.index')->with([
+            'credentials' => $credentials->get(),
+        ]);
     }
 
     /**
@@ -87,6 +96,8 @@ class CredentialController extends Controller
      */
     public function destroy(Credential $credential)
     {
+        $this->authorize('delete', $credential);
+
         $credential->delete();
 
         return redirect()->back();

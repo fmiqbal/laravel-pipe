@@ -22,16 +22,18 @@
                         <th>Username</th>
                         <th>Type</th>
                         <th>Fingerprint</th>
+                        @include('pipe::partials.table_creator_column_th')
                         <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach (\Fikrimi\Pipe\Models\Credential::all() as $credential)
+                    @foreach ($credentials as $credential)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $credential->username }}</td>
                             <td>{{ \Fikrimi\Pipe\Models\Credential::$typeNames[$credential->type] }}</td>
                             <td>{{ strtoupper($credential->fingerprint) }}</td>
+                            @include('pipe::partials.table_creator_column_td', ['model' => $credential])
                             <td>
                                 <button type="submit" form="form-delete" formaction="{{ route('pipe.credentials.destroy', $credential) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                             </td>

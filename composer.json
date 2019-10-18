@@ -23,7 +23,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Fikrimi\\Pipe\\PipeServiceProvider"
+                "Fikrimi\\Pipe\\PipeServiceProvider",
+                "Fikrimi\\Pipe\\AuthServiceProvider"
             ]
         }
     }

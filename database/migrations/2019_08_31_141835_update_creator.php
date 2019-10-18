@@ -14,6 +14,9 @@ class UpdateCreator extends Migration
      */
     public function up()
     {
+        if (! config('pipe.modules.auth')) {
+            return;
+        }
         /** @var \Doctrine\DBAL\Schema\Column $column */
         $column = DB::connection()->getDoctrineColumn(config('pipe.auth.table_name'), config('pipe.auth.primary_key'));
 
@@ -29,7 +32,7 @@ class UpdateCreator extends Migration
     public function addCreator(Blueprint $table, Column $column)
     {
         $table->addColumn($this->getLaravelColumnType($column), 'created_by', [
-            'nullable' => ! $column->getNotnull(),
+            'nullable' => true,
             'unsigned' => $column->getUnsigned(),
             'length'   => $column->getLength(),
         ]);
@@ -45,10 +48,24 @@ class UpdateCreator extends Migration
      */
     public function down()
     {
-        // Schema::dropIfexists('pipe_stacks');
+        if (! config('pipe.modules.auth')) {
+            return;
+        }
+
+        Schema::table('pipe_credentials', function (Blueprint $table) {
+            $table->dropForeign(['created_by']);
+            $table->dropColumn('created_by');
+        });
+
+        Schema::table('pipe_projects', function (Blueprint $table) {
+            $table->dropForeign(['created_by']);
+            $table->dropColumn('created_by');
+        });
     }
 
     /**
+     * A reverse for getDoctrineColumnType()
+     *
      * @param \Doctrine\DBAL\Schema\Column $column
      * @return string
      */
