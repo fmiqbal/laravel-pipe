@@ -24,7 +24,6 @@ class CreateProjectsTable extends Migration
             $table->json('commands');
             $table->smallInteger('timeout')->default(300);
             $table->text('namespace');
-            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
 
             $table->foreign('credential_id')->references('id')
