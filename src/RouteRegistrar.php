@@ -29,11 +29,11 @@ class RouteRegistrar
      *
      * @return void
      */
-    public function all()
+    public function all($prefix = 'pipe')
     {
         $this->router->group([
-            'as' => 'pipe.',
-            'prefix'    => 'pipe',
+            'as'        => 'pipe.',
+            'prefix'    => $prefix,
             'namespace' => '\Fikrimi\Pipe\Http\Controllers',
         ], function (Router $router) {
             $router->get('/', [
@@ -46,10 +46,11 @@ class RouteRegistrar
                 'as'   => 'build',
             ]);
             $router->resource('builds', 'BuildController', [
-                'except' => ['create', 'store']
+                'except' => ['create', 'store'],
             ]);
             $router->resource('projects', 'ProjectController');
-            $router->resource('credentials', 'CredentialController');
+            $router->resource('credentials', 'CredentialController')
+                ->only(['index', 'create', 'store', 'destroy']);
             $router->resource('stacks', 'StackController');
 
             $router->post('webhook/{project}', [

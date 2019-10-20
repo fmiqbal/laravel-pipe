@@ -2,13 +2,12 @@
 
 namespace Fikrimi\Pipe\Tests;
 
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    // use RefreshDatabase;
-
     /**
      * @var \Illuminate\Foundation\Auth\User
      */
@@ -16,8 +15,10 @@ abstract class TestCase extends BaseTestCase
 
     public function checkAuth($route, $method = 'get', $payload = [])
     {
+        $this->withExceptionHandling();
+
         /** @var $response \Illuminate\Foundation\Testing\TestResponse */
-        $response = $this->$method('/pipe' . $route, $payload);
+        $response = $this->$method($route, $payload);
 
         $response->assertStatus(302);
 
@@ -43,11 +44,13 @@ abstract class TestCase extends BaseTestCase
         $this->user = factory(\Illuminate\Foundation\Auth\User::class)->create();
 
         Route::group([
-            'middleware' => 'auth'
+            'middleware' => ['auth', 'web']
         ], function () {
             \Illuminate\Support\Facades\Auth::routes();
-            \Fikrimi\Pipe\Pipe::routes();
+            \Fikrimi\Pipe\Pipe::routes('');
         });
+
+        $this->withoutExceptionHandling();
     }
 
     protected function getEnvironmentSetUp($app)

@@ -15,7 +15,7 @@ use Fikrimi\Pipe\Models\Traits\HasCreator;
  * @property int|null $created_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\User|null $creator
+ * @property-read \Fikrimi\Pipe\Models\User|null $creator
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential query()

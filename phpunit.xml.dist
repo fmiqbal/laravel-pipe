@@ -18,6 +18,11 @@
         <env name="DB_USERNAME" value="forge"/>
         <env name="DB_PASSWORD" value="forge"/>
     </php>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
     <testsuites>
         <testsuite name="All Test Suite">
             <directory suffix=".php">./tests/</directory>

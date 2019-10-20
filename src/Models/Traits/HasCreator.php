@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe\Models\Traits;
 
-use App\User;
+use Fikrimi\Pipe\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasCreator

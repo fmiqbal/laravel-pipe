@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe\Policies;
 
-use App\User;
+use Fikrimi\Pipe\Models\User;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -13,7 +13,7 @@ class ProjectPolicy
     /**
      * Determine whether the user can view the credential.
      *
-     * @param  \App\User  $user
+     * @param  \Fikrimi\Pipe\Models\User  $user
      * @param  \Fikrimi\Pipe\Models\Project  $project
      * @return mixed
      */
@@ -27,7 +27,7 @@ class ProjectPolicy
     }
 
     /**
-     * @param  \App\User  $user
+     * @param  \Fikrimi\Pipe\Models\User  $user
      * @param  \Fikrimi\Pipe\Models\Project  $project
      * @return mixed
      */
@@ -43,7 +43,7 @@ class ProjectPolicy
     /**
      * Determine whether the user can delete the credential.
      *
-     * @param  \App\User  $user
+     * @param  \Fikrimi\Pipe\Models\User  $user
      * @param  \Fikrimi\Pipe\Models\Project  $credential
      * @return mixed
      */

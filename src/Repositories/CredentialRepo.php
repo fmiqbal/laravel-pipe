@@ -19,6 +19,10 @@ class CredentialRepo extends Repository
             $this->fromArray($array);
         }
 
+        if (config('pipe.modules.auth')) {
+            $this->model->created_by = auth()->id();
+        }
+
         $this->model->auth = Crypt::encrypt($this->model->auth);
         $this->model->fingerprint = $this->getFingerprint();
 

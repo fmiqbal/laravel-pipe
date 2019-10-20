@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Route;
 
 class Pipe
 {
-    public static function routes($callback = null, array $options = [])
+    public static function routes($prefix = 'pipe', $callback = null, array $options = [])
     {
-        $callback = $callback ?: function ($router) {
-            $router->all();
+        $callback = $callback ?: function ($router) use ($prefix) {
+            $router->all($prefix);
         };
 
         Route::group($options, function (Router $router) use ($callback) {

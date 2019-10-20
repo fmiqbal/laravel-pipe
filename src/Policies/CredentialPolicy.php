@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe\Policies;
 
-use App\User;
+use Illuminate\Foundation\Auth\User;
 use Fikrimi\Pipe\Models\Credential;
 use Illuminate\Auth\Access\HandlesAuthorization;
 

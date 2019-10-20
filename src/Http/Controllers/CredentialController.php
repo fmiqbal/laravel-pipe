@@ -53,40 +53,6 @@ class CredentialController extends BaseController
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param \App\Project $project
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Project $project)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Project $project
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Project $project)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Project $project
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Project $project)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param \Fikrimi\Pipe\Models\Credential $credential
@@ -99,6 +65,6 @@ class CredentialController extends BaseController
 
         $credential->delete();
 
-        return redirect()->back();
+        return redirect()->route('pipe.credentials.index');
     }
 }
