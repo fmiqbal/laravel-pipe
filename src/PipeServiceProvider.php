@@ -20,6 +20,7 @@ class PipeServiceProvider extends ServiceProvider
             __DIR__ . '/../config/pipe.php'        => config_path() . '/pipe.php',
             __DIR__ . '/../resources/views/assets' => public_path('pipe-assets'),
         ], 'pipe');
+        $this->mergeConfigFrom(__DIR__ . '/../config/pipe.php', 'pipe');
 
         $this->app->booting(function () {
             $loader = AliasLoader::getInstance();

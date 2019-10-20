@@ -2,13 +2,12 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 use Str;
 
-class ProjectController extends Controller
+class ProjectController extends BaseController
 {
     use HasPolicy;
 

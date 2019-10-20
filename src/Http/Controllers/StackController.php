@@ -2,13 +2,12 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 
-class StackController extends Controller
+class StackController extends BaseController
 {
     /**
      * Display a listing of the resource.

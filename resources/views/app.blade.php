@@ -80,7 +80,7 @@
 
             <!-- Begin Page Content -->
             <div class="container-fluid p-t-30">
-                @if ($errors->any())
+                @if (($errors ?? false) && $errors->any())
                     @foreach ($errors->all() as $error)
                         <div class="alert alert-danger alert-dismissible">
                             <button type="button" class="close m-t-10" data-dismiss="alert">&times;</button>

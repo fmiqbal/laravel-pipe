@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Credentials;
+namespace Fikrimi\Pipe\Tests\Feature\Credentials;
 
-use Tests\TestCase;
+use Fikrimi\Pipe\Tests\TestCase;
 
 class IndexTest extends TestCase
 {
@@ -13,17 +13,10 @@ class IndexTest extends TestCase
      */
     public function test_index_can_be_accessed()
     {
-        \Route::get('test', function () {
-            return "asdkfj";
-        });
+        $this->checkAuth('');
 
-        $response = $this->get('/test');
-        $response->assertSee('haha');
+        $response = $this->get('/pipe');
 
-        // if (config('pipe.modules.auth')) {
-        //     $response->assertStatus(302);
-        // } else {
-        //     $response->assertStatus(200);
-        // }
+        $response->assertSee('Dashboard');
     }
 }

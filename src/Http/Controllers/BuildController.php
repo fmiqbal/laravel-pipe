@@ -2,7 +2,6 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Cache;
 use DB;
 use Exception;
@@ -14,7 +13,7 @@ use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 use Str;
 
-class BuildController extends Controller
+class BuildController extends BaseController
 {
     use HasPolicy;
 

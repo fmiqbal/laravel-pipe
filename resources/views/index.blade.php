@@ -1,5 +1,5 @@
 @extends('pipe::app')
 
 @section('content')
-    test
+    Welcome to Laravel Pipe
 @endsection
