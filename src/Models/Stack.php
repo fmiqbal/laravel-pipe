@@ -4,7 +4,11 @@ namespace Fikrimi\Pipe\Models;
 
 class Stack extends BaseModel
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'description',
+        'commands'
+    ];
 
     protected $casts = [
         'commands' => 'json'

@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe\Policies;
 
-use Fikrimi\Pipe\Models\User;
+use Illuminate\Foundation\Auth\User;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Auth\Access\HandlesAuthorization;
 

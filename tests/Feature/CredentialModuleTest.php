@@ -8,20 +8,20 @@ use Fikrimi\Pipe\Tests\TestCase;
 class CredentialModuleTest extends TestCase
 {
     /** @var Credential */
-    private $cred1;
+    private $credentialOwned;
 
     /** @var Credential */
-    private $cred2;
+    private $credentialOther;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->cred1 = factory(Credential::class)->create();
-        $this->cred2 = factory(Credential::class)->create();
+        $this->credentialOwned = factory(Credential::class)->create();
+        $this->credentialOther = factory(Credential::class)->create();
 
-        $this->cred1->setCreator($this->user)->save();
-        $this->cred2->setCreator(factory(\Illuminate\Foundation\Auth\User::class)->create())->save();
+        $this->credentialOwned->setCreator($this->user)->save();
+        $this->credentialOther->setCreator(factory(\Illuminate\Foundation\Auth\User::class)->create())->save();
     }
 
     /**
@@ -46,8 +46,8 @@ class CredentialModuleTest extends TestCase
         ]);
 
         $this->get('credentials')
-            ->assertSee($this->cred1->username)
-            ->assertSee($this->cred2->username);
+            ->assertSee($this->credentialOwned->username)
+            ->assertSee($this->credentialOther->username);
     }
 
     public function test_index_not_showing_other_cred()
@@ -59,8 +59,8 @@ class CredentialModuleTest extends TestCase
         ]);
 
         $this->get('credentials')
-            ->assertSee($this->cred1->username)
-            ->assertDontSee($this->cred2->username);
+            ->assertSee($this->credentialOwned->username)
+            ->assertDontSee($this->credentialOther->username);
     }
 
     public function test_create_can_be_accessed()

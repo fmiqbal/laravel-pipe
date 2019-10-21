@@ -5,7 +5,6 @@ namespace Fikrimi\Pipe\Http\Controllers;
 use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
-use Str;
 
 class ProjectController extends BaseController
 {
@@ -54,8 +53,8 @@ class ProjectController extends BaseController
                 'dir_deploy'    => $request->get('dir_deploy'),
                 'dir_workspace' => $request->get('dir_workspace'),
                 'host'          => $request->get('host'),
+                'commands'      => $request->get('commands'),
                 'credential_id' => $request->get('credential_id'),
-                'id'            => Str::orderedUuid(),
             ])
             ->save();
 
@@ -114,6 +113,6 @@ class ProjectController extends BaseController
 
         $project->delete();
 
-        return redirect()->back();
+        return redirect()->route('pipe.projects.index');
     }
 }

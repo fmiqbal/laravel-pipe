@@ -2,12 +2,19 @@
 
 namespace Fikrimi\Pipe\Tests;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Fikrimi\Pipe\AuthServiceProvider;
+use Fikrimi\Pipe\Pipe;
+use Fikrimi\Pipe\PipeServiceProvider;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    public const F_MAKE = 'make';
+    public const F_CREATE = 'create';
+
     /**
      * @var \Illuminate\Foundation\Auth\User
      */
@@ -28,8 +35,8 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app)
     {
         return [
-            \Fikrimi\Pipe\PipeServiceProvider::class,
-            \Fikrimi\Pipe\AuthServiceProvider::class,
+            PipeServiceProvider::class,
+            AuthServiceProvider::class,
         ];
     }
 
@@ -41,13 +48,13 @@ abstract class TestCase extends BaseTestCase
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->withFactories(__DIR__ . '/../database/factories');
 
-        $this->user = factory(\Illuminate\Foundation\Auth\User::class)->create();
+        $this->user = factory(User::class)->create();
 
         Route::group([
-            'middleware' => ['auth', 'web']
+            'middleware' => ['auth', 'web'],
         ], function () {
-            \Illuminate\Support\Facades\Auth::routes();
-            \Fikrimi\Pipe\Pipe::routes('');
+            Auth::routes();
+            Pipe::routes('');
         });
 
         $this->withoutExceptionHandling();
@@ -56,5 +63,22 @@ abstract class TestCase extends BaseTestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('pipe.modules.auth', true);
+    }
+
+    public function createResource($model, $type = self::F_MAKE, $creator = null)
+    {
+        $resource = factory($model)->$type();
+
+        if ($creator !== null) {
+            if ($creator instanceof User) {
+                $resource->setCreator($creator)->save();
+            }
+
+            if ($creator === 'other') {
+                $resource->setCreator(factory(User::class)->create())->save();
+            }
+        }
+
+        return $resource;
     }
 }

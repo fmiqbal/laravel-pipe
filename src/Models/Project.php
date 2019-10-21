@@ -2,6 +2,9 @@
 
 namespace Fikrimi\Pipe\Models;
 
+use Fikrimi\Pipe\Models\Traits\HasCreator;
+use Illuminate\Support\Str;
+
 /**
  * Fikrimi\Pipe\Models\Project
  *
@@ -37,11 +40,34 @@ namespace Fikrimi\Pipe\Models;
  */
 class Project extends BaseModel
 {
+    use HasCreator;
+
     public $incrementing = false;
-    protected $guarded = [];
     protected $casts = [
-        'commands' => 'json'
+        'commands' => 'json',
     ];
+
+    protected $fillable = [
+        'id',
+        'name',
+        'credential_id',
+        'provider',
+        'host',
+        'dir_deploy',
+        'dir_workspace',
+        'timeout',
+        'commands',
+        'namespace',
+    ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (\Illuminate\Database\Eloquent\Model $model) {
+            $model->id = Str::orderedUuid();
+        });
+    }
 
     public function credential()
     {

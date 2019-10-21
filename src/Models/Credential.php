@@ -52,7 +52,6 @@ class Credential extends BaseModel
         'username',
         'type',
         'auth',
-        'created_by',
     ];
 
     public static function getAuth($credential)
