@@ -46,16 +46,7 @@ class ProjectController extends BaseController
     public function store(Request $request, Project $project)
     {
         $project
-            ->fill([
-                'provider'      => $request->get('provider'),
-                'name'          => $request->get('name'),
-                'namespace'     => $request->get('namespace'),
-                'dir_deploy'    => $request->get('dir_deploy'),
-                'dir_workspace' => $request->get('dir_workspace'),
-                'host'          => $request->get('host'),
-                'commands'      => $request->get('commands'),
-                'credential_id' => $request->get('credential_id'),
-            ])
+            ->fill($request->toArray())
             ->save();
 
         return redirect()->route('pipe.projects.index');

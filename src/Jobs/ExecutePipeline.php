@@ -2,11 +2,10 @@
 
 namespace Fikrimi\Pipe\Jobs;
 
-use Cache;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
-use Crypt;
+use Illuminate\Support\Facades\Crypt;
 use Exception;
-use Fikrimi\Pipe\Enum\Provider;
 use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Fikrimi\Pipe\Exceptions\TerminationException;
 use Fikrimi\Pipe\Models\Build;
@@ -34,7 +33,7 @@ class ExecutePipeline implements ShouldQueue
     /**
      * @var \Fikrimi\Pipe\Models\Project
      */
-    private $build;
+    public $build;
     /**
      * @var \Pusher\Pusher
      */
@@ -82,7 +81,7 @@ class ExecutePipeline implements ShouldQueue
     {
         $workspaceDir = 'projects-' . $this->build->project->id;
         $buildDir = date('YmdHis-') . $this->build->id;
-        $url = Provider::$repositoryUrlSsh[$this->project->provider] . $this->project->namespace;
+        $url = \Fikrimi\Pipe\Enum\Repository::$repositoryUrlSsh[$this->project->repository] . $this->project->namespace;
 
         $branch = 'master';
 

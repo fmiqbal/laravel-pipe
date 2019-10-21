@@ -2,16 +2,14 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use Cache;
-use DB;
 use Exception;
 use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
-use Fikrimi\Pipe\Jobs\ExecutePipeline;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
-use Str;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class BuildController extends BaseController
 {
@@ -30,26 +28,19 @@ class BuildController extends BaseController
         $this->authorize('build', $project);
 
         try {
-            $invoker = $request->wantsJson() ? 'webhook' : 'manual';
-
             DB::beginTransaction();
-            $build->fill([
-                'id'           => Str::orderedUuid(),
-                'status'       => Build::S_PROVISIONING,
-                'meta_project' => $project->toArray(),
-                'invoker'      => $invoker,
-            ]);
+
+            $build->invoker = $request->wantsJson() ? 'webhook' : 'manual';
 
             $project->builds()->save($build);
 
-            ExecutePipeline::dispatch($build);
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
             throw new ApplicationException($e);
         }
 
-        return back();
+        return redirect()->route('pipe.projects.show', $project);
     }
 
     public function show(Build $build)

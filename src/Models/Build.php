@@ -2,6 +2,9 @@
 
 namespace Fikrimi\Pipe\Models;
 
+use Fikrimi\Pipe\Jobs\ExecutePipeline;
+use Illuminate\Support\Str;
+
 /**
  * Fikrimi\Pipe\Models\Build
  *
@@ -56,7 +59,7 @@ class Build extends BaseModel
         'meta_steps'   => 'json',
         'meta_project' => 'json',
     ];
-    protected $guarded = [];
+    protected $fillable = [];
     protected $dates = [
         'started_at',
         'stopped_at',
@@ -67,6 +70,23 @@ class Build extends BaseModel
         return [
             self::S_FAILED, self::S_TERMINATED, self::S_SUCCESS,
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (\Illuminate\Database\Eloquent\Model $model) {
+            $model->forceFill([
+                'id'           => Str::orderedUuid()->toString(),
+                'status'       => Build::S_PROVISIONING,
+                'meta_project' => Project::find($model->project_id)->toArray(),
+            ]);
+        });
+
+        static::created(function (\Illuminate\Database\Eloquent\Model $model) {
+            ExecutePipeline::dispatch($model);
+        });
     }
 
     public function getCacheKey($for)
@@ -99,8 +119,8 @@ class Build extends BaseModel
     {
         if ($this->status === self::S_RUNNING && \Carbon\Carbon::now() > $this->started_at) {
             $this->update([
-                'status' => self::S_FAILED,
-                'stopped_at' => $this->started_at->addSeconds($this->project->timeout)
+                'status'     => self::S_FAILED,
+                'stopped_at' => $this->started_at->addSeconds($this->project->timeout),
             ]);
         }
     }
