@@ -2,14 +2,14 @@
 
 namespace Fikrimi\Pipe\Models\Traits;
 
-use Fikrimi\Pipe\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User;
 
 trait HasCreator
 {
     private $autoCreator = true;
 
-    public static function bootWithCreator()
+    public static function bootHasCreator()
     {
         static::creating(function ($model) {
             if ($model->autoCreator && method_exists($model, 'setCreator')) {
@@ -33,7 +33,9 @@ trait HasCreator
             $user = User::find(auth()->id());
         }
 
-        $this->creator()->associate($user);
+        $this->forceFill([
+            $this->getCreatorColumn() => $user[$this->getCreatorPrimaryKey()],
+        ]);
 
         return $this;
     }
@@ -43,11 +45,16 @@ trait HasCreator
      */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, $this->getCreatorColumn(), 'id');
+        return $this->belongsTo(User::class, $this->getCreatorColumn(), $this->getCreatorPrimaryKey());
     }
 
     public function getCreatorColumn()
     {
         return 'created_by';
+    }
+
+    public function getCreatorPrimaryKey()
+    {
+        return 'id';
     }
 }

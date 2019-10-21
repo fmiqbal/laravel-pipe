@@ -2,26 +2,26 @@
 
 namespace Fikrimi\Pipe\Tests\Feature;
 
-use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Tests\TestCase;
 
 class CredentialModuleTest extends TestCase
 {
+    /** @var Credential */
+    private $cred1;
+
+    /** @var Credential */
+    private $cred2;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->cred1 = CredentialRepo::fromArray(factory(Credential::class)->make())->store();
-        $this->cred2 = CredentialRepo::fromArray(factory(Credential::class)->make())->store();
+        $this->cred1 = factory(Credential::class)->create();
+        $this->cred2 = factory(Credential::class)->create();
 
-        $this->cred1->getModel()->update([
-            'created_by' => $this->user->id,
-        ]);
-        $this->cred2->getModel()->update([
-            'created_by' => factory(\Illuminate\Foundation\Auth\User::class)->create()->id,
-        ]);
+        $this->cred1->setCreator($this->user)->save();
+        $this->cred2->setCreator(factory(\Illuminate\Foundation\Auth\User::class)->create())->save();
     }
 
     /**
@@ -95,7 +95,7 @@ class CredentialModuleTest extends TestCase
             'pipe.auth.policies.credentials.delete_other' => false,
         ]);
 
-        $cred = CredentialRepo::fromArray(factory(Credential::class)->make())->store();
+        $cred = factory(Credential::class)->create();
 
         $this->delete('credentials/' . $cred->id)
             ->assertRedirect('credentials')

@@ -3,6 +3,8 @@
 namespace Fikrimi\Pipe\Models;
 
 use Fikrimi\Pipe\Models\Traits\HasCreator;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 /**
  * Fikrimi\Pipe\Models\Credential
@@ -35,6 +37,7 @@ class Credential extends BaseModel
 
     public const T_KEY = 0;
     public const T_PASS = 1;
+
     public static $typeNames = [
         self::T_KEY  => 'Private Key',
         self::T_PASS => 'Password',
@@ -45,10 +48,30 @@ class Credential extends BaseModel
         self::T_PASS => 'password',
     ];
 
-    protected $guarded = [];
+    protected $fillable = [
+        'username',
+        'type',
+        'auth',
+        'created_by',
+    ];
 
     public static function getAuth($credential)
     {
         return self::$typeAuth[$credential['type']];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function (\Illuminate\Database\Eloquent\Model $model) {
+            $model->auth = Crypt::encrypt($model->auth);
+            $model->fingerprint = strtoupper(Str::orderedUuid());
+        });
+    }
+
+    public function getAuthDecryptedAttribute()
+    {
+        return \Illuminate\Support\Facades\Crypt::decrypt($this->auth);
     }
 }

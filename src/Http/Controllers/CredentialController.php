@@ -2,10 +2,8 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
 use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Credential;
-use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 
 class CredentialController extends BaseController
@@ -42,12 +40,13 @@ class CredentialController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
+     * @param \Fikrimi\Pipe\Models\Credential $credential
      * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request, Credential $credential)
     {
-        CredentialRepo::fromRequest($request)
-            ->store();
+        $credential->fill($request->all())
+            ->save();
 
         return redirect()->route('pipe.credentials.index');
     }
