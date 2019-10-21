@@ -1,44 +1,45 @@
 {
-    "name": "fikrimi/pipe",
-    "description": "Yet Another Laravel CI/CD Tools",
-    "authors": [
-        {
-            "name": "Fikri Muhammad Iqbal",
-            "email": "fikri.miqbal23@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=7",
-        "illuminate/support": "^6",
-        "laravelcollective/remote": "^6",
-        "pusher/pusher-php-server": "^4.0",
-        "phpseclib/phpseclib": "*",
-        "ext-sodium": "*"
-    },
-    "autoload": {
-        "psr-4": {
-            "Fikrimi\\Pipe\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Fikrimi\\Pipe\\Tests\\": "tests"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Fikrimi\\Pipe\\PipeServiceProvider",
-                "Fikrimi\\Pipe\\AuthServiceProvider",
-                "Fikrimi\\Pipe\\RouteServiceProvider"
-            ]
-        }
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^8.4",
-        "orchestra/testbench": "^4.2",
-        "doctrine/dbal": "^2.9",
-        "orchestra/testbench-dusk": "^4.0",
-        "moontoast/math": "^1.1"
+  "name": "fikrimi/pipe",
+  "description": "Yet Another Laravel CI/CD Tools",
+  "authors": [
+    {
+      "name": "Fikri Muhammad Iqbal",
+      "email": "fikri.miqbal23@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=7",
+    "illuminate/support": "^6",
+    "laravelcollective/remote": "^6",
+    "pusher/pusher-php-server": "^4.0",
+    "phpseclib/phpseclib": "*",
+    "ext-sodium": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Fikrimi\\Pipe\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Fikrimi\\Pipe\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Fikrimi\\Pipe\\PipeServiceProvider",
+        "Fikrimi\\Pipe\\AuthServiceProvider",
+        "Fikrimi\\Pipe\\RouteServiceProvider"
+      ]
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.4",
+    "orchestra/testbench": "^4.2",
+    "doctrine/dbal": "^2.9",
+    "orchestra/testbench-dusk": "^4.0",
+    "moontoast/math": "^1.1"
+  }
 }
