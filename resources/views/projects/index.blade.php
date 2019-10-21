@@ -29,7 +29,7 @@
                     @foreach ($projects as $project)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ \Fikrimi\Pipe\Enum\Provider::$names[$project->provider] }}</td>
+                            <td>{{ \Fikrimi\Pipe\Enum\Repository::$names[$project->repository] }}</td>
                             <td>{{ $project->name }}</td>
                             @include('pipe::partials.table_creator_column_td', ['model' => $project])
                             <td>

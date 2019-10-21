@@ -51,7 +51,7 @@ class Project extends BaseModel
         'id',
         'name',
         'credential_id',
-        'provider',
+        'repository',
         'host',
         'dir_deploy',
         'dir_workspace',
@@ -65,7 +65,7 @@ class Project extends BaseModel
         parent::boot();
 
         static::creating(function (\Illuminate\Database\Eloquent\Model $model) {
-            $model->id = Str::orderedUuid();
+            $model->id = Str::orderedUuid()->toString();
         });
     }
 

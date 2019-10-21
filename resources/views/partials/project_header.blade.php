@@ -3,7 +3,7 @@
         <div class="col-md-6">
             <div class="row">
                 <div class="col-md-6"><b>Provider</b></div>
-                <div class="col-md-6">{{ \Fikrimi\Pipe\Enum\Provider::$names[$project->provider] }}</div>
+                <div class="col-md-6">{{ \Fikrimi\Pipe\Enum\Repository::$names[$project->repository] }}</div>
             </div>
         </div>
         <div class="col-md-6">

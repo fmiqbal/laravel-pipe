@@ -21,7 +21,7 @@
                     <div class="form-group">
                         <label for="provider">Provider</label>
                         <select form="form-project" name="provider" id="provider" class="form-control">
-                            @foreach (\Fikrimi\Pipe\Enum\Provider::getRepositories() as $id => $name)
+                            @foreach (\Fikrimi\Pipe\Enum\Repository::all() as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>

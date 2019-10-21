@@ -3,7 +3,7 @@
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use Faker\Generator as Faker;
-use Fikrimi\Pipe\Enum\Provider;
+use Fikrimi\Pipe\Enum\Repository;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
 use Fikrimi\Pipe\Models\Stack;
@@ -58,7 +58,7 @@ $factory->define(Project::class, function (Faker $faker) {
         'credential_id' => function () {
             return factory(Credential::class)->create()->id;
         },
-        'provider'      => $faker->randomElement(Provider::all()),
+        'repository'    => $faker->randomElement(Repository::all()),
         'host'          => $faker->ipv4,
         'dir_deploy'    => '/srv/www/' . Str::slug($domain) . '/deploy',
         'dir_workspace' => '/srv/www/' . Str::slug($domain) . '/workspace',

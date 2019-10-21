@@ -17,7 +17,7 @@ class CreateProjectsTable extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->unsignedBigInteger('credential_id');
-            $table->smallInteger('provider');
+            $table->smallInteger('repository');
             $table->string('host');
             $table->string('dir_deploy');
             $table->string('dir_workspace');
