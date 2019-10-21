@@ -81,4 +81,14 @@ class Project extends BaseModel
     {
         return $this->hasMany(Build::class);
     }
+
+    public function release($invoker)
+    {
+        $build = new Build();
+        $build->invoker = $invoker;
+
+        $this->builds()->save($build);
+
+        return $this;
+    }
 }

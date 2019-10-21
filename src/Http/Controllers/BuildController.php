@@ -18,23 +18,16 @@ class BuildController extends BaseController
     /**
      * @param \Illuminate\Http\Request $request
      * @param \Fikrimi\Pipe\Models\Project $project
-     * @param \Fikrimi\Pipe\Models\Build $build
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function build(Request $request, Project $project, Build $build)
+    public function build(Request $request, Project $project)
     {
         $this->authorize('build', $project);
 
         try {
-            DB::beginTransaction();
-
-            $build->invoker = $request->wantsJson() ? 'webhook' : 'manual';
-
-            $project->builds()->save($build);
-
-            DB::commit();
+            $project->release($request->wantsJson() ? 'webhook' : 'manual');
         } catch (Exception $e) {
             DB::rollBack();
             throw new ApplicationException($e);
