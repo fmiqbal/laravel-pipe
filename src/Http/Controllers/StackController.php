@@ -2,9 +2,8 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use Fikrimi\Pipe\Facades\Repositories\CredentialRepo;
-use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Models\Project;
+use Fikrimi\Pipe\Models\Stack;
 use Illuminate\Http\Request;
 
 class StackController extends BaseController
@@ -33,25 +32,18 @@ class StackController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
+     * @param \Fikrimi\Pipe\Models\Stack $stack
      * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request, Stack $stack)
     {
-        CredentialRepo::fromRequest($request)
-            ->store();
+        $stack->fill($request->toArray())
+            ->fill([
+                'commands' => explode(PHP_EOL, $request->get('commands')),
+            ])
+            ->save();
 
         return redirect()->route('pipe::stacks.index');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Project $project
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Project $project)
-    {
-        //
     }
 
     /**
@@ -69,8 +61,8 @@ class StackController extends BaseController
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \App\Project $project
-     * @return \Illuminate\Http\Response
+     * @param \Fikrimi\Pipe\Models\Project $project
+     * @return void
      */
     public function update(Request $request, Project $project)
     {
@@ -80,14 +72,14 @@ class StackController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param \Fikrimi\Pipe\Models\Credential $credential
+     * @param \Fikrimi\Pipe\Models\Stack $stack
      * @return void
      * @throws \Exception
      */
-    public function destroy(Credential $credential)
+    public function destroy(Stack $stack)
     {
-        $credential->delete();
+        $stack->delete();
 
-        return redirect()->back();
+        return redirect()->route('pipe::stacks.index');
     }
 }
