@@ -30,8 +30,7 @@
     "laravel": {
       "providers": [
         "Fikrimi\\Pipe\\PipeServiceProvider",
-        "Fikrimi\\Pipe\\AuthServiceProvider",
-        "Fikrimi\\Pipe\\RouteServiceProvider"
+        "Fikrimi\\Pipe\\AuthServiceProvider"
       ]
     }
   },
