@@ -27,6 +27,7 @@ class RouteRegistrar
     /**
      * Register routes for transient tokens, clients, and personal access tokens.
      *
+     * @param string $prefix
      * @return void
      */
     public function all($prefix = 'pipe')
@@ -36,10 +37,9 @@ class RouteRegistrar
             'prefix'    => $prefix,
             'namespace' => '\Fikrimi\Pipe\Http\Controllers',
         ], function (Router $router) {
-            $router->get('/', [
-                'uses' => 'DashboardController@index',
-                'as'   => 'dashboard.index',
-            ]);
+            $router->get('/', function () {
+                return redirect()->route('pipe.projects.index');
+            });
 
             $router->post('projects/{project}/build', [
                 'uses' => 'BuildController@build',

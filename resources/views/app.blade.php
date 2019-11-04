@@ -40,25 +40,18 @@
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
 
-        <!-- Nav Item - Dashboard -->
-        <li class="nav-item active">
-            <a class="nav-link" href="{{ route('pipe.dashboard.index') }}">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Dashboard</span></a>
-        </li>
-
         <!-- Nav Item - Charts -->
-        <li class="nav-item">
+        <li class="nav-item {{ Route::currentRouteName() === 'pipe.credentials.index' ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('pipe.credentials.index') }}">
                 <i class="fas fa-fw fa-users"></i>
                 <span>Credentials</span></a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {{ Route::currentRouteName() === 'pipe.stacks.index' ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('pipe.stacks.index') }}">
                 <i class="fas fa-fw fa-stream"></i>
                 <span>Stacks</span></a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {{ Route::currentRouteName() === 'pipe.projects.index' ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('pipe.projects.index') }}">
                 <i class="fas fa-fw fa-chart-area"></i>
                 <span>Projects</span></a>
