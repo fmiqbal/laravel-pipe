@@ -8,7 +8,7 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">CREDENTIALS</h1>
-        <a href="{{ route('pipe.credentials.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-fw fa-sm text-white-50"></i> Add new credentials</a>
+        <a href="{{ route('pipe::credentials.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-fw fa-sm text-white-50"></i> Add new credentials</a>
     </div>
 
     <!-- DataTales Example -->
@@ -35,7 +35,7 @@
                             <td>{{ strtoupper($credential->fingerprint) }}</td>
                             @include('pipe::partials.table_creator_column_td', ['model' => $credential])
                             <td>
-                                <button type="submit" form="form-delete" formaction="{{ route('pipe.credentials.destroy', $credential) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+                                <button type="submit" form="form-delete" formaction="{{ route('pipe::credentials.destroy', $credential) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                             </td>
                         </tr>
                     @endforeach

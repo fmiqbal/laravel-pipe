@@ -11,7 +11,7 @@
     </div>
     <div class="card shadow mb-4 col-md-6">
         <div class="card-body">
-            <form action="{{ route('pipe.credentials.store') }}" method="post">
+            <form action="{{ route('pipe::credentials.store') }}" method="post">
                 @csrf
                 <div class="form-group">
                     <label for="username">Username</label>

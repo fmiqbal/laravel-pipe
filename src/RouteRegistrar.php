@@ -33,12 +33,12 @@ class RouteRegistrar
     public function all($prefix = 'pipe')
     {
         $this->router->group([
-            'as'        => 'pipe.',
+            'as'        => 'pipe::',
             'prefix'    => $prefix,
             'namespace' => '\Fikrimi\Pipe\Http\Controllers',
         ], function (Router $router) {
             $router->get('/', function () {
-                return redirect()->route('pipe.projects.index');
+                return redirect()->route('pipe::projects.index');
             });
 
             $router->post('projects/{project}/build', [

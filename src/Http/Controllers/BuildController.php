@@ -33,7 +33,7 @@ class BuildController extends BaseController
             throw new ApplicationException($e);
         }
 
-        return redirect()->route('pipe.projects.show', $project);
+        return redirect()->route('pipe::projects.show', $project);
     }
 
     public function show(Build $build)

@@ -48,7 +48,7 @@ class CredentialController extends BaseController
         $credential->fill($request->all())
             ->save();
 
-        return redirect()->route('pipe.credentials.index');
+        return redirect()->route('pipe::credentials.index');
     }
 
     /**
@@ -64,6 +64,6 @@ class CredentialController extends BaseController
 
         $credential->delete();
 
-        return redirect()->route('pipe.credentials.index');
+        return redirect()->route('pipe::credentials.index');
     }
 }

@@ -40,7 +40,7 @@ class StackController extends BaseController
         CredentialRepo::fromRequest($request)
             ->store();
 
-        return redirect()->route('pipe.stacks.index');
+        return redirect()->route('pipe::stacks.index');
     }
 
     /**

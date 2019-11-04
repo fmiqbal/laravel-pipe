@@ -8,7 +8,7 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">PROJECTS</h1>
-        <a href="{{ route('pipe.projects.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-fw fa-sm text-white-50"></i> Add new projects</a>
+        <a href="{{ route('pipe::projects.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-fw fa-sm text-white-50"></i> Add new projects</a>
     </div>
 
     <!-- DataTales Example -->
@@ -33,8 +33,8 @@
                             <td>{{ $project->name }}</td>
                             @include('pipe::partials.table_creator_column_td', ['model' => $project])
                             <td>
-                                <a class="btn btn-primary btn-sm" href="{{ route('pipe.projects.show', $project) }}"><i class="fas fa-eye fa-fw"></i> Show</a>
-                                <button type="submit" form="form-delete" formaction="{{ route('pipe.projects.destroy', $project) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash fa-fw"></i> Delete</button>
+                                <a class="btn btn-primary btn-sm" href="{{ route('pipe::projects.show', $project) }}"><i class="fas fa-eye fa-fw"></i> Show</a>
+                                <button type="submit" form="form-delete" formaction="{{ route('pipe::projects.destroy', $project) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash fa-fw"></i> Delete</button>
                             </td>
                         </tr>
                     @endforeach

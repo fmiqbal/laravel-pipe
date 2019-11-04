@@ -49,7 +49,7 @@ class ProjectController extends BaseController
             ->fill($request->toArray())
             ->save();
 
-        return redirect()->route('pipe.projects.index');
+        return redirect()->route('pipe::projects.index');
     }
 
     /**
@@ -104,6 +104,6 @@ class ProjectController extends BaseController
 
         $project->delete();
 
-        return redirect()->route('pipe.projects.index');
+        return redirect()->route('pipe::projects.index');
     }
 }

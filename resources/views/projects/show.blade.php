@@ -5,7 +5,7 @@
 @endpush
 
 @section('content')
-    <form method="post" action="{{ route('pipe.build', $project) }}" id="form-build">
+    <form method="post" action="{{ route('pipe::build', $project) }}" id="form-build">
         @csrf
     </form>
     <!-- Page Heading -->
@@ -53,10 +53,10 @@
                                 <td>{{ $build->invoker }}</td>
                                 <td>{{ ucwords($build->status_name) }}</td>
                                 <td>
-                                    <a href="{{ route('pipe.builds.show', $build) }}" class="btn btn-primary btn-sm">
+                                    <a href="{{ route('pipe::builds.show', $build) }}" class="btn btn-primary btn-sm">
                                         Details
                                     </a>
-                                    <button type="submit" form="form-destroy" class="btn btn-danger btn-sm" formaction="{{ route('pipe.builds.destroy', $build) }}">
+                                    <button type="submit" form="form-destroy" class="btn btn-danger btn-sm" formaction="{{ route('pipe::builds.destroy', $build) }}">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </td>

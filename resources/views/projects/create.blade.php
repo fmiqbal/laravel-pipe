@@ -69,7 +69,7 @@
             </div>
         </div>
     </div>
-    <form action="{{ route('pipe.projects.store') }}" method="post" id="form-project">
+    <form action="{{ route('pipe::projects.store') }}" method="post" id="form-project">
         @csrf
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
