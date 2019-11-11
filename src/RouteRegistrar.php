@@ -51,6 +51,12 @@ class RouteRegistrar
             $router->resource('projects', 'ProjectController');
             $router->resource('credentials', 'CredentialController')
                 ->only(['index', 'create', 'store', 'destroy']);
+
+            $router->post('stacks/{stack}/duplicate', [
+                'uses' => 'StackController@duplicate',
+                'as'   => 'stacks.duplicate',
+            ]);
+
             $router->resource('stacks', 'StackController');
 
             $router->post('webhook/{project}', [

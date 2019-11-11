@@ -2,7 +2,6 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use Fikrimi\Pipe\Models\Project;
 use Fikrimi\Pipe\Models\Stack;
 use Illuminate\Http\Request;
 
@@ -46,6 +45,13 @@ class StackController extends BaseController
         return redirect()->route('pipe::stacks.index');
     }
 
+    public function duplicate(Stack $stack)
+    {
+        $stack->replicate()->save();
+
+        return redirect()->route('pipe::stacks.index');
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -55,7 +61,7 @@ class StackController extends BaseController
     public function edit(Stack $stack)
     {
         return view('pipe::stacks.edit')->with([
-            'stack' => $stack
+            'stack' => $stack,
         ]);
     }
 
