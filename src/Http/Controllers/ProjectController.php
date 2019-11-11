@@ -71,24 +71,30 @@ class ProjectController extends BaseController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param \App\Project $project
+     * @param \Fikrimi\Pipe\Models\Project $project
      * @return \Illuminate\Http\Response
      */
     public function edit(Project $project)
     {
-        //
+        return view('pipe::projects.edit')->with([
+            'project' =>  $project
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \App\Project $project
+     * @param \Fikrimi\Pipe\Models\Project $project
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Project $project)
     {
-        //
+        $project
+            ->fill($request->toArray())
+            ->save();
+
+        return redirect()->route('pipe::projects.index');
     }
 
     /**

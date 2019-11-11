@@ -37,9 +37,6 @@ class StackController extends BaseController
     public function store(Request $request, Stack $stack)
     {
         $stack->fill($request->toArray())
-            ->fill([
-                'commands' => explode(PHP_EOL, $request->get('commands')),
-            ])
             ->save();
 
         return redirect()->route('pipe::stacks.index');
@@ -50,6 +47,13 @@ class StackController extends BaseController
         $stack->replicate()->save();
 
         return redirect()->route('pipe::stacks.index');
+    }
+
+    public function show(Request $request, Stack $stack)
+    {
+        if ($request->wantsJson()) {
+            return $stack;
+        }
     }
 
     /**
@@ -75,9 +79,6 @@ class StackController extends BaseController
     public function update(Request $request, Stack $stack)
     {
         $stack->fill($request->toArray())
-            ->fill([
-                'commands' => explode(PHP_EOL, $request->get('commands')),
-            ])
             ->save();
 
         return redirect()->route('pipe::stacks.index');

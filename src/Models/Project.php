@@ -67,6 +67,12 @@ class Project extends BaseModel
         static::creating(function (\Illuminate\Database\Eloquent\Model $model) {
             $model->id = Str::orderedUuid()->toString();
         });
+
+        static::saving(function (\Illuminate\Database\Eloquent\Model $model) {
+            if (! is_array($model->commands)) {
+                $model->commands = preg_split("/\s\s+/", $model->commands);
+            }
+        });
     }
 
     public function credential()
