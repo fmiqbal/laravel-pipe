@@ -11,10 +11,11 @@
     </div>
     <div class="card shadow mb-4 col-md-6">
         <div class="card-body">
-            <form action="{{ route('pipe::stacks.store') }}" method="post">
+            <form action="{{ route('pipe::stacks.update', $stack) }}" method="post">
                 @csrf
+                @method('patch')
                 @include('pipe::stacks.form', [
-                    'stack' => new \Fikrimi\Pipe\Models\Stack()
+                    'stack' => $stack
                 ])
             </form>
         </div>

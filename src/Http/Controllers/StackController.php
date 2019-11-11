@@ -49,24 +49,32 @@ class StackController extends BaseController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param \App\Project $project
+     * @param \Fikrimi\Pipe\Models\Stack $stack
      * @return \Illuminate\Http\Response
      */
-    public function edit(Project $project)
+    public function edit(Stack $stack)
     {
-        //
+        return view('pipe::stacks.edit')->with([
+            'stack' => $stack
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Fikrimi\Pipe\Models\Project $project
+     * @param \Fikrimi\Pipe\Models\Stack $stack
      * @return void
      */
-    public function update(Request $request, Project $project)
+    public function update(Request $request, Stack $stack)
     {
-        //
+        $stack->fill($request->toArray())
+            ->fill([
+                'commands' => explode(PHP_EOL, $request->get('commands')),
+            ])
+            ->save();
+
+        return redirect()->route('pipe::stacks.index');
     }
 
     /**

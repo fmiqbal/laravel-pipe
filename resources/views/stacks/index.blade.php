@@ -22,9 +22,9 @@
                             {{ $stack->name }}
 
                             <div class="float-right">
-                                {{--                                <a href="{{ route('pipe::stacks.edit') }}"><i class="fas fa-fw fa-edit"></i></a>--}}
-                                {{--<i class="fas text-danger fa-fw fa-trash"></i>--}}
-                                <button style="padding: 0; margin: 0; background: none; border: none" type="submit" form="form-delete" formaction="{{ route('pipe::stacks.destroy', $stack) }}"><i class="fas text-danger fa-fw fa-trash"></i></button>
+                                <a href="{{ route('pipe::stacks.edit', $stack) }}"><i class="fas fa-fw fa-edit"></i></a>
+                                <button style="padding: 0; margin: 0; background: none; border: none" type="submit" form="form-delete" formaction="{{ route('pipe::stacks.destroy', $stack) }}">
+                                    <i class="fas text-danger fa-fw fa-trash"></i></button>
                             </div>
                         </h6>
                     </div>
