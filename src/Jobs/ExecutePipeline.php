@@ -2,15 +2,12 @@
 
 namespace Fikrimi\Pipe\Jobs;
 
-use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Crypt;
 use Exception;
+use Fikrimi\Pipe\Enum\Repository;
 use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Fikrimi\Pipe\Exceptions\TerminationException;
 use Fikrimi\Pipe\Models\Build;
-use Fikrimi\Pipe\Models\Credential;
-use Fikrimi\Pipe\Models\Project;
 use Fikrimi\Pipe\Models\Step;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,11 +15,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
-use phpseclib\Crypt\RSA;
+use Illuminate\Support\Facades\Cache;
 use phpseclib\Net\SSH2;
 use Pusher\Pusher;
 
-class ExecutePipeline implements ShouldQueue
+class ExecutePipeline extends Executor implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -31,26 +28,10 @@ class ExecutePipeline implements ShouldQueue
      */
     public $timeout = 600;
     /**
-     * @var \Fikrimi\Pipe\Models\Project
-     */
-    public $build;
-    /**
-     * @var \Pusher\Pusher
-     */
-    private $broadcaster;
-    /**
-     * @var string
-     */
-    private $signature;
-    /**
      * @var \Fikrimi\Pipe\Models\Step
      */
-    private $step;
-    /**
-     * @var \Fikrimi\Pipe\Models\Project
-     */
-    private $project;
-    private $status;
+    protected $step;
+    protected $status;
 
     /**
      * Create a new job instance.
@@ -60,12 +41,7 @@ class ExecutePipeline implements ShouldQueue
      */
     public function __construct(Build $build)
     {
-        $this->build = $build;
-        $this->project = (new Project())
-            ->forceFill($build->meta_project);
-
-        $this->broadcaster = $this->getBroadcaster();
-        $this->signature = hash('crc32', now() . $this->build->id);
+        parent::__construct($build);
 
         $this->timeout = $this->project->timeout;
         set_time_limit($this->project->timeout);
@@ -79,29 +55,44 @@ class ExecutePipeline implements ShouldQueue
      */
     public function handle()
     {
-        $workspaceDir = 'projects-' . $this->build->project->id;
+        $projectDir = 'projects-' . $this->build->project->id;
         $buildDir = date('YmdHis-') . $this->build->id;
-        $url = \Fikrimi\Pipe\Enum\Repository::$repositoryUrlSsh[$this->project->repository] . $this->project->namespace;
+        $url = Repository::$repositoryUrlSsh[$this->project->repository] . $this->project->namespace;
 
         $branch = 'master';
+        $keepBuildCount = 10;
+
+        $keepBuilds = Build::latest()->limit($keepBuildCount)->pluck('id')->toArray();
+        $removeCommands = '';
+        foreach (array_merge(['base'], $keepBuilds) as $keepBuild) {
+            $removeCommands .= "| grep -v '$keepBuild'";
+        }
 
         $commands = $this->prepCommands([
             'pipe-preparing-workspace' => [
+                // make directory
                 "\cd {$this->project->dir_workspace}",
-                "\mkdir -p {$workspaceDir}/base",
-                "\cd {$workspaceDir}/base",
+                "\mkdir -p {$projectDir}/base",
+
+                // checkout git
+                "\cd {$projectDir}/base",
                 'git init',
                 "git remote remove origin; git remote add origin {$url}",
                 'git fetch',
                 "git reset --hard origin/{$branch}",
-                "\cd ..",
+
+                // copy to new folder
+                "\cd {$this->project->dir_workspace}/{$projectDir}",
                 "\\rsync -aq base/ {$buildDir} --exclude .git",
                 "\cd $buildDir",
             ],
-            'build'                    => $this->project->commands,
-            'pipe-post-build'          => [
+
+            'build' => $this->project->commands,
+
+            'pipe-post-build' => [
+                // remove deploy directory
                 "\\rm -rf {$this->project->dir_deploy}",
-                "\ln -s {$this->project->dir_workspace}/{$workspaceDir}/{$buildDir} {$this->project->dir_deploy}",
+                "\ln -s {$this->project->dir_workspace}/{$projectDir}/{$buildDir} {$this->project->dir_deploy}",
             ],
         ]);
 
@@ -117,12 +108,21 @@ class ExecutePipeline implements ShouldQueue
                 function ($line) {
                     $this->buildHook($line);
 
+                    // check for in-build termination
                     if ((int) Cache::get($this->build->getCacheKey('status')) === Build::S_PENDING_TERM) {
                         throw new TerminationException('Terminated by user');
                     }
                 });
+
+            $ssh->exec(
+                implode(' && ', [
+                    // clean old build
+                    "\cd {$this->project->dir_workspace}/{$projectDir}",
+                    "\\rm -rf `ls $removeCommands`",
+                ])
+            );
         } catch (Exception $e) {
-            ($ssh ?? false) && $ssh->_close_channel(SSH2::CHANNEL_EXEC);
+            isset($ssh) && $ssh->_close_channel(SSH2::CHANNEL_EXEC);
 
             $this->build->update([
                 'errors'     => $e->getMessage(),
@@ -150,80 +150,12 @@ class ExecutePipeline implements ShouldQueue
     }
 
     /**
-     * @return \Pusher\Pusher
-     * @throws \Pusher\PusherException
-     */
-    private function getBroadcaster(): Pusher
-    {
-        $broadcaster = new Pusher(
-            '0d289eb62a8539cda514',
-            'e29f55177c2ce50ecab9',
-            '870492',
-            [
-                'cluster' => 'ap1',
-                'useTLS'  => true,
-            ]
-        );
-
-        return $broadcaster;
-    }
-
-    /**
-     * @param \Fikrimi\Pipe\Models\Project $project
-     * @return \phpseclib\Net\SSH2
-     */
-    private function getSSH(Project $project)
-    {
-        $ssh = new SSH2($project->host);
-        $auth = Crypt::decrypt($project->credential->auth);
-
-        if (Credential::T_KEY) {
-            $auth = (new RSA())->loadKey($auth);
-        }
-
-        $ssh->setTimeout($this->project->timeout);
-        $login = $ssh->login($project->credential->username, $auth);
-
-        if (! $login) {
-            throw new Exception('Login Failed');
-        }
-
-        return $ssh;
-    }
-
-    private function prepCommands($commands)
-    {
-        if (! $commands instanceof Collection) {
-            $commands = collect($commands);
-        }
-
-        $steps = [];
-
-        foreach ($commands as $key => $group) {
-            foreach ($group as $command) {
-                $steps[] = $this->build->steps()->create([
-                    'command' => $command,
-                    'group'   => $key,
-                ]);
-            }
-        }
-
-        return collect($steps)
-            ->map(function ($item) {
-                return ''
-                    . 'echo "pipe-signature-' . $this->signature . ' start ' . $item->id . '";'
-                    . $item->command . ';'
-                    . 'echo "pipe-signature-' . $this->signature . ' stop" $?';
-            })
-            ->toArray();
-    }
-
-    /**
      * @param $rawLine
      * @return void
      * @throws \Pusher\PusherException
+     * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
      */
-    private function buildHook($rawLine)
+    protected function buildHook($rawLine)
     {
         $lines = explode("\n", $rawLine);
 
