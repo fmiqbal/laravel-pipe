@@ -59,7 +59,9 @@ class Build extends BaseModel
         'meta_steps'   => 'json',
         'meta_project' => 'json',
     ];
-    protected $fillable = [];
+    protected $fillable = [
+        'status'
+    ];
     protected $dates = [
         'started_at',
         'stopped_at',
