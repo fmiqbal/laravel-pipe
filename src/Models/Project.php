@@ -50,6 +50,7 @@ class Project extends BaseModel
     protected $fillable = [
         'id',
         'name',
+        'branch',
         'credential_id',
         'repository',
         'host',
@@ -57,6 +58,7 @@ class Project extends BaseModel
         'dir_workspace',
         'timeout',
         'commands',
+        'current_build',
         'namespace',
     ];
 
@@ -88,10 +90,19 @@ class Project extends BaseModel
         return $this->hasMany(Build::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function currentBuild()
+    {
+        return $this->belongsTo(Build::class);
+    }
+
     public function release($invoker)
     {
         $build = new Build();
         $build->invoker = $invoker;
+        $build->branch = $this->branch;
 
         $this->builds()->save($build);
 

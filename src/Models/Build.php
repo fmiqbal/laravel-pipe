@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe\Models;
 
-use Fikrimi\Pipe\Jobs\ExecutePipeline;
+use Fikrimi\Pipe\Jobs\BuildProject;
 use Illuminate\Support\Str;
 
 /**
@@ -60,7 +60,8 @@ class Build extends BaseModel
         'meta_project' => 'json',
     ];
     protected $fillable = [
-        'status'
+        'status',
+        'branch',
     ];
     protected $dates = [
         'started_at',
@@ -87,7 +88,7 @@ class Build extends BaseModel
         });
 
         static::created(function (\Illuminate\Database\Eloquent\Model $model) {
-            ExecutePipeline::dispatch($model);
+            BuildProject::dispatch($model);
         });
     }
 
@@ -95,12 +96,6 @@ class Build extends BaseModel
     {
         return "pipe-cache-build-$for-{$this->id}";
     }
-
-    //public function getMetaProjectObjAttribute()
-    //{
-    //    return json_encode(j)
-    //}
-    //
 
     public function getStatusNameAttribute()
     {
@@ -119,7 +114,7 @@ class Build extends BaseModel
 
     public function checkTimeOut()
     {
-        if ($this->status === self::S_RUNNING && \Carbon\Carbon::now() > $this->started_at) {
+        if ($this->status === self::S_RUNNING && \Carbon\Carbon::now() > $this->started_at && $this->started_at !== null) {
             $this->update([
                 'status'     => self::S_FAILED,
                 'stopped_at' => $this->started_at->addSeconds($this->project->timeout),

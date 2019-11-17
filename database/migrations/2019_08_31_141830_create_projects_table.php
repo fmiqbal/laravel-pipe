@@ -21,6 +21,8 @@ class CreateProjectsTable extends Migration
             $table->string('host');
             $table->string('dir_deploy');
             $table->string('dir_workspace');
+            $table->string('branch');
+            $table->smallInteger('keep_build')->default(10);
             $table->json('commands');
             $table->smallInteger('timeout')->default(300);
             $table->text('namespace');

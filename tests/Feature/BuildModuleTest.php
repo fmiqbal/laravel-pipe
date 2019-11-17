@@ -2,7 +2,7 @@
 
 namespace Fikrimi\Pipe\Tests\Feature;
 
-use Fikrimi\Pipe\Jobs\ExecutePipeline;
+use Fikrimi\Pipe\Jobs\BuildProject;
 use Fikrimi\Pipe\Models\Project;
 use Fikrimi\Pipe\Tests\TestCase;
 use Illuminate\Support\Facades\Bus;
@@ -33,7 +33,7 @@ class BuildModuleTest extends TestCase
         $project = factory(Project::class)->create()
             ->release('unit_testing');
 
-        Bus::assertDispatched(ExecutePipeline::class, function (ExecutePipeline $job) use ($project) {
+        Bus::assertDispatched(BuildProject::class, function (BuildProject $job) use ($project) {
             return $job->build->project_id === $project->id;
         });
     }

@@ -14,12 +14,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use phpseclib\Net\SSH2;
-use Pusher\Pusher;
 
-class ExecutePipeline extends Executor implements ShouldQueue
+class BuildProject extends Executor implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -37,7 +35,6 @@ class ExecutePipeline extends Executor implements ShouldQueue
      * Create a new job instance.
      *
      * @param \Fikrimi\Pipe\Models\Build $build
-     * @throws \Pusher\PusherException
      */
     public function __construct(Build $build)
     {
@@ -59,10 +56,7 @@ class ExecutePipeline extends Executor implements ShouldQueue
         $buildDir = date('YmdHis-') . $this->build->id;
         $url = Repository::$repositoryUrlSsh[$this->project->repository] . $this->project->namespace;
 
-        $branch = 'master';
-        $keepBuildCount = 10;
-
-        $keepBuilds = Build::latest()->limit($keepBuildCount)->pluck('id')->toArray();
+        $keepBuilds = Build::latest()->limit($this->project->keep_build)->pluck('id')->toArray();
         $removeCommands = '';
         foreach (array_merge(['base'], $keepBuilds) as $keepBuild) {
             $removeCommands .= "| grep -v '$keepBuild'";
@@ -79,7 +73,7 @@ class ExecutePipeline extends Executor implements ShouldQueue
                 'git init',
                 "git remote remove origin; git remote add origin {$url}",
                 'git fetch',
-                "git reset --hard origin/{$branch}",
+                "git reset --hard origin/{$this->build->branch}",
 
                 // copy to new folder
                 "\cd {$this->project->dir_workspace}/{$projectDir}",
@@ -137,6 +131,12 @@ class ExecutePipeline extends Executor implements ShouldQueue
 
         if (! isset($e)) {
             $failed = $this->build->steps()->where('exit_status', '<>', '0')->exists();
+
+            if (! $failed) {
+                $this->project->update([
+                    'current_build' => $this->build->id
+                ]);
+            }
 
             $this->build->update([
                 'status'     => $failed ? Build::S_FAILED : Build::S_SUCCESS,

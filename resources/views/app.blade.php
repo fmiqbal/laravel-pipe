@@ -143,6 +143,12 @@
 <!-- Page level plugins -->
 <script src="{{ asset('pipe-assets/vendor/chart.js/Chart.min.js') }}"></script>
 
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+
 @stack('js')
 
 </body>

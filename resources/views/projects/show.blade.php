@@ -38,6 +38,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Invoker</th>
+                            <th>Branch</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -51,17 +52,32 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $build->created_at  }}</td>
                                 <td>{{ $build->invoker }}</td>
-                                @if ($build->status === \Fikrimi\Pipe\Models\Build::S_SUCCESS)
-                                    <td><span class="badge badge-success">{{ ucwords($build->status_name) }}</span></td>
-                                @elseif ($build->status === \Fikrimi\Pipe\Models\Build::S_FAILED || $build->status === \Fikrimi\Pipe\Models\Build::S_TERMINATED)
-                                    <td><span class="badge badge-danger">{{ ucwords($build->status_name) }}</span></td>
-                                @else
-                                    <td><span class="badge badge-light">{{ ucwords($build->status_name) }}</span></td>
-                                @endif
+                                <td>{{ $build->branch }}</td>
+                                <td>
+                                    <span class="badge
+                                        @if ($build->status === \Fikrimi\Pipe\Models\Build::S_SUCCESS)
+                                            badge-success
+                                        @elseif ($build->status === \Fikrimi\Pipe\Models\Build::S_FAILED || $build->status === \Fikrimi\Pipe\Models\Build::S_TERMINATED)
+                                            badge-danger
+                                        @else
+                                            badge-light
+                                        @endif
+                                            ">
+                                        {{ ucwords($build->status_name) }}
+                                    </span>
+                                    @if ($build->id === $project->current_build)
+                                        <span class="badge badge-primary">Active</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <a href="{{ route('pipe::builds.show', $build) }}" class="btn btn-primary btn-sm">
                                         Details
                                     </a>
+
+                                    <button data-toggle="tooltip" title="Switch to this version" type="submit" form="form-destroy" class="btn btn-primary btn-sm" formaction="{{ route('pipe::builds.destroy', $build) }}">
+                                        <i class="fas fa-sync"></i>
+                                    </button>
+
                                     <button type="submit" form="form-destroy" class="btn btn-danger btn-sm" formaction="{{ route('pipe::builds.destroy', $build) }}">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -76,6 +92,10 @@
     </div>
     <form id="form-destroy" method="post">
         @method('delete')
+        @csrf
+    </form>
+    <form id="form-switch" method="post">
+        @method('patch')
         @csrf
     </form>
 @endsection

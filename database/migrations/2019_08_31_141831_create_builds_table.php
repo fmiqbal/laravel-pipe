@@ -17,6 +17,7 @@ class CreateBuildsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('project_id');
             $table->string('invoker');
+            $table->string('branch');
             $table->char('status');
             $table->text('errors')->nullable();
             $table->dateTime('started_at')->nullable();
@@ -26,6 +27,16 @@ class CreateBuildsTable extends Migration
 
             $table->foreign('project_id')->references('id')
                 ->on('pipe_projects')
+                ->onUpdate('CASCADE')
+                ->onDelete('CASCADE');
+        });
+
+
+        Schema::table('pipe_projects', function (Blueprint $table) {
+            $table->uuid('current_build')->nullable();
+
+            $table->foreign('current_build')->references('id')
+                ->on('pipe_builds')
                 ->onUpdate('CASCADE')
                 ->onDelete('CASCADE');
         });

@@ -24,6 +24,10 @@
                     <label for="namespace">Repository Namespace</label>
                     <input required form="form-project" name="namespace" type="text" class="form-control" id="namespace" placeholder="myname/my-awesome-project" value="{{ fill('namespace', $project) }}">
                 </div>
+                <div class="form-group">
+                    <label for="branch">Branch Default</label>
+                    <input required form="form-project" name="branch" type="text" class="form-control" id="branch" placeholder="master" value="{{ fill('branch', $project) }}">
+                </div>
             </div>
         </div>
     </div>
@@ -76,7 +80,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="namespace">Commands</label>
+                    <label for="stack-commands">Commands</label>
                     <textarea form="form-project" class="form-control" name="commands" id="stack-commands" cols="30" rows="10">{{ implode(PHP_EOL, optional($project ?? [])->commands ?: []) }}</textarea>
                 </div>
             </div>
