@@ -62,6 +62,8 @@ class Build extends BaseModel
     protected $fillable = [
         'status',
         'branch',
+        'started_at',
+        'stopped_at',
     ];
     protected $dates = [
         'started_at',

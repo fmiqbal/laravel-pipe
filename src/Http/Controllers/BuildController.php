@@ -36,6 +36,27 @@ class BuildController extends BaseController
         return redirect()->route('pipe::projects.show', $project);
     }
 
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \Fikrimi\Pipe\Models\Project $project
+     * @param \Fikrimi\Pipe\Models\Build $build
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function switchBuild(Request $request, Build $build)
+    {
+        $this->authorize('build', $build->project);
+
+        try {
+            \Fikrimi\Pipe\Jobs\SwitchBuild::dispatch($build);
+        } catch (Exception $e) {
+            throw new ApplicationException($e);
+        }
+
+        return redirect()->route('pipe::projects.show', $build->project);
+    }
+
     public function show(Build $build)
     {
         $stepGroups = $build->steps->groupBy('group');

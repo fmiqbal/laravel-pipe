@@ -37,6 +37,7 @@
                         <tr>
                             <th>#</th>
                             <th>Date</th>
+                            <th>Duration</th>
                             <th>Invoker</th>
                             <th>Branch</th>
                             <th>Status</th>
@@ -51,6 +52,11 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $build->created_at  }}</td>
+                                <td>
+                                    @if ($build->stopped_at)
+                                        {{ $build->started_at->diff($build->stopped_at)->format('%H:%I:%S')  }}
+                                    @endif
+                                </td>
                                 <td>{{ $build->invoker }}</td>
                                 <td>{{ $build->branch }}</td>
                                 <td>
@@ -74,7 +80,7 @@
                                         Details
                                     </a>
 
-                                    <button data-toggle="tooltip" title="Switch to this version" type="submit" form="form-destroy" class="btn btn-primary btn-sm" formaction="{{ route('pipe::builds.destroy', $build) }}">
+                                    <button data-toggle="tooltip" title="Switch to this version" type="submit" form="form-switch" class="btn btn-primary btn-sm" formaction="{{ route('pipe::builds.switch', $build) }}">
                                         <i class="fas fa-sync"></i>
                                     </button>
 
@@ -95,7 +101,6 @@
         @csrf
     </form>
     <form id="form-switch" method="post">
-        @method('patch')
         @csrf
     </form>
 @endsection

@@ -45,6 +45,10 @@ class RouteRegistrar
                 'uses' => 'BuildController@build',
                 'as'   => 'build',
             ]);
+            $router->post('builds/{build}/switch', [
+                'uses' => 'BuildController@switchBuild',
+                'as'   => 'builds.switch',
+            ]);
             $router->resource('builds', 'BuildController', [
                 'except' => ['create', 'store'],
             ]);
