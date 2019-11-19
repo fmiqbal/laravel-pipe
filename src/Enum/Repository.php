@@ -14,9 +14,15 @@ class Repository extends Enum
         self::BITBUCKET => 'BitBucket',
     ];
 
-    public static $repositoryUrlSsh = [
+    public static $sshURL = [
         self::GITLAB    => 'git@gitlab.com:',
         self::GITHUB    => 'git@github.com:',
         self::BITBUCKET => 'git@bitbucket.com:',
+    ];
+
+    public static $fabLogo = [
+        self::GITLAB    => 'gitlab',
+        self::GITHUB    => 'github',
+        self::BITBUCKET => 'bitbucket',
     ];
 }
