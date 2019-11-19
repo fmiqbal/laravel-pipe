@@ -11,25 +11,27 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
-            PROJECT {{ strtoupper($project->name) }}
+            <small>project</small> <b>{{ strtoupper($project->name) }}</b>
         </h1>
         <button form="form-build" type="submit" class="btn btn-primary btn-sm float-right">Build and Deploy</button>
     </div>
     <div class="row">
         <div class="col-sm-12 m-b-30">
             <div class="card shadow">
-                <div class="card-header py-3">
+                <a href="#project-header" class="card-header py-3" data-toggle="collapse">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        Details
+                        Project Details
                     </h6>
+                </a>
+                <div class="collapse" id="project-header">
+                    @include('pipe::partials.project_header')
                 </div>
-                @include('pipe::partials.project_header')
             </div>
         </div>
         <div class="col-sm-12">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">History</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Build History</h6>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -53,9 +55,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $build->created_at  }}</td>
                                 <td>
-                                    @if ($build->stopped_at)
-                                        {{ $build->started_at->diff($build->stopped_at)->format('%H:%I:%S')  }}
-                                    @endif
+                                    {{ $build->duration->format('%G:%I:%S') }}
                                 </td>
                                 <td>{{ $build->invoker }}</td>
                                 <td>{{ $build->branch }}</td>
