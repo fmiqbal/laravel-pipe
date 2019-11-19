@@ -94,6 +94,15 @@ class Build extends BaseModel
         });
     }
 
+    public function getDurationAttribute()
+    {
+        if ($this->stopped_at) {
+            return $this->started_at->diff($this->stopped_at);
+        }
+
+        return '-1';
+    }
+
     public function getCacheKey($for)
     {
         return "pipe-cache-build-$for-{$this->id}";
