@@ -54,7 +54,7 @@ class BuildProject extends Executor implements ShouldQueue
     {
         $projectDir = 'projects-' . $this->build->project->id;
         $buildDir = date('YmdHis-') . $this->build->id;
-        $url = Repository::$repositoryUrlSsh[$this->project->repository] . $this->project->namespace;
+        $url = Repository::$sshURL[$this->project->repository] . $this->project->namespace;
 
         $keepBuilds = Build::latest()->limit($this->project->keep_build)->pluck('id')->toArray();
         $removeCommands = '';
