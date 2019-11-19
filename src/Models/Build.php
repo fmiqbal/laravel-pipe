@@ -11,12 +11,15 @@ use Illuminate\Support\Str;
  * @property string $id
  * @property string $project_id
  * @property string $invoker
+ * @property string $branch
  * @property int $status
- * @property array $meta
- * @property array $meta_steps
+ * @property string|null $errors
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $stopped_at
  * @property array $meta_project
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read mixed $duration
  * @property-read mixed $status_name
  * @property-read \Fikrimi\Pipe\Models\Project $project
  * @property-read \Illuminate\Database\Eloquent\Collection|\Fikrimi\Pipe\Models\Step[] $steps
@@ -24,14 +27,16 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereBranch($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereErrors($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereInvoker($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMeta($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMetaProject($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMetaSteps($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereProjectId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStartedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStoppedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereUpdatedAt($value)
  * @mixin \Eloquent
  */

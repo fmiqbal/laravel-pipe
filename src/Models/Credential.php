@@ -14,10 +14,11 @@ use Illuminate\Support\Str;
  * @property int $type
  * @property string $fingerprint
  * @property string $auth
- * @property int|null $created_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Fikrimi\Pipe\Models\User|null $creator
+ * @property int|null $created_by
+ * @property-read \Illuminate\Foundation\Auth\User|null $creator
+ * @property-read mixed $auth_decrypted
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential query()
@@ -65,7 +66,7 @@ class Credential extends BaseModel
 
         static::saving(function (\Illuminate\Database\Eloquent\Model $model) {
             $model->auth = Crypt::encrypt($model->auth);
-            $model->fingerprint = strtoupper(Str::orderedUuid());
+            $model->fingerprint = strtoupper(Str::uuid());
         });
     }
 
