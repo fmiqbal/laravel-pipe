@@ -18,6 +18,7 @@ class CreateBuildsTable extends Migration
             $table->uuid('project_id');
             $table->string('invoker');
             $table->string('branch');
+            $table->string('commit_id')->nullable();
             $table->char('status');
             $table->text('errors')->nullable();
             $table->dateTime('started_at')->nullable();
