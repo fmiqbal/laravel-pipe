@@ -50,6 +50,11 @@ class CreateBuildsTable extends Migration
      */
     public function down()
     {
+        Schema::table('pipe_projects', function (Blueprint $table) {
+            $table->dropForeign(['current_build']);
+            $table->dropColumn('current_build');
+        });
+
         Schema::dropIfexists('pipe_builds');
     }
 }
