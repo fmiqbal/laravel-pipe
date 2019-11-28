@@ -53,7 +53,7 @@ class BuildProject extends Executor implements ShouldQueue
     public function handle()
     {
         $projectDir = 'projects-' . $this->build->project->id;
-        $buildDir = date('YmdHis-') . $this->build->id;
+        $buildDir = $this->build->created_at->format('YmdHis') . '-' . $this->build->id;
         $url = Repository::$sshURL[$this->project->repository] . $this->project->namespace;
 
         $keepBuilds = Build::latest()->limit($this->project->keep_build)->pluck('id')->toArray();
