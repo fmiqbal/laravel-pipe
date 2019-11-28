@@ -2,7 +2,6 @@
 
 namespace Fikrimi\Pipe\Models;
 
-use Fikrimi\Pipe\Models\Traits\HasCreator;
 use Illuminate\Support\Str;
 
 /**
@@ -50,7 +49,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Project whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Project extends BaseModel
+class Project extends BaseModel implements UserOwnable
 {
     use HasCreator;
 

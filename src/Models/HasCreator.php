@@ -1,6 +1,6 @@
 <?php
 
-namespace Fikrimi\Pipe\Models\Traits;
+namespace Fikrimi\Pipe\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User;
@@ -22,7 +22,7 @@ trait HasCreator
      * @param $status
      * @return void
      */
-    public function setAutoCreator($status): void
+    public function setAutoCreator($status)
     {
         $this->autoCreator = $status;
     }
@@ -43,7 +43,7 @@ trait HasCreator
     /**
      * @return BelongsTo
      */
-    public function creator(): BelongsTo
+    public function creator()
     {
         return $this->belongsTo(User::class, $this->getCreatorColumn(), $this->getCreatorPrimaryKey());
     }

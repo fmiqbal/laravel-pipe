@@ -2,7 +2,6 @@
 
 namespace Fikrimi\Pipe\Models;
 
-use Fikrimi\Pipe\Models\Traits\HasCreator;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
@@ -32,7 +31,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Credential whereUsername($value)
  * @mixin \Eloquent
  */
-class Credential extends BaseModel
+class Credential extends BaseModel implements UserOwnable
 {
     use HasCreator;
 
