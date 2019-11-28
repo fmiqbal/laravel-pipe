@@ -54,6 +54,8 @@ class StackController extends BaseController
         if ($request->wantsJson()) {
             return $stack;
         }
+
+        return abort(404);
     }
 
     /**
