@@ -63,6 +63,7 @@ $factory->define(Project::class, function (Faker $faker) {
         'dir_deploy'    => '/srv/www/' . Str::slug($domain) . '/deploy',
         'dir_workspace' => '/srv/www/' . Str::slug($domain) . '/workspace',
         'timeout'       => $faker->numberBetween(100, 1000),
+        'branch'        => 'master',
         'commands'      => function () {
             return factory(Stack::class)->create()->commands;
         },
