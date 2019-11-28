@@ -27,7 +27,7 @@ abstract class Executor
     /**
      * @var \Fikrimi\Pipe\Models\Project
      */
-    protected $build;
+    public $build;
     /**
      * @var \Fikrimi\Pipe\Models\Project
      */
