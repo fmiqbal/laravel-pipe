@@ -34,7 +34,10 @@ class ApplicationException extends Exception
      */
     public function render()
     {
-        if (config('app.env') === 'production') {
+        if (
+            config('app.env') === 'production'
+            || config('app.env') === 'testing'
+        ) {
             return back()->withInput()->withErrors('Terjadi Kesalahan, Silahkan coba lagi');
         }
 
