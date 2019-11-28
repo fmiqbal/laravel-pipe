@@ -137,4 +137,9 @@ class Build extends BaseModel
             ]);
         }
     }
+
+    public static function switchTo(Build $build)
+    {
+        \Fikrimi\Pipe\Jobs\SwitchBuild::dispatch($build);
+    }
 }

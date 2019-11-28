@@ -49,7 +49,7 @@ class BuildController extends BaseController
         $this->authorize('build', $build->project);
 
         try {
-            \Fikrimi\Pipe\Jobs\SwitchBuild::dispatch($build);
+            Build::switchTo($build);
         } catch (Exception $e) {
             throw new ApplicationException($e);
         }
