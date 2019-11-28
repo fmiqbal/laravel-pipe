@@ -71,7 +71,9 @@ class ProjectModuleTest extends TestCase
         $this->get('projects/create')
             ->assertSeeTextInOrder([
                 'NEW PROJECT',
-                'Repository',
+                // 'Repository',
+                // 'Deploy Server',
+                // 'Commands',
             ]);
     }
 
@@ -134,8 +136,12 @@ class ProjectModuleTest extends TestCase
 
         $projectOwned = $this->createResource(Project::class, self::F_CREATE);
 
-        $this->put('projects/' . $projectOwned->id)
-            ->assertStatus(200)
+        $projectOwned->fill($this->createResource(Project::class, self::F_MAKE)->toArray());
+
+        $this->put('projects/' . $projectOwned->id, $projectOwned->toArray())
+            ->assertRedirect('projects/');
+
+        $this->get('projects/')
             ->assertSee($projectOwned->name);
     }
 
