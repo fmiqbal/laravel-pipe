@@ -54,11 +54,6 @@ class Credential extends BaseModel implements UserOwnable
         'auth',
     ];
 
-    public static function getAuth($credential)
-    {
-        return self::$typeAuth[$credential['type']];
-    }
-
     protected static function boot()
     {
         parent::boot();

@@ -2,6 +2,7 @@
 
 namespace Fikrimi\Pipe\Models;
 
+use Fikrimi\Pipe\Exceptions\ApplicationException;
 use Illuminate\Support\Str;
 
 /**
@@ -102,13 +103,10 @@ class Project extends BaseModel implements UserOwnable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @param $invoker
+     * @return $this
+     * @throws \Fikrimi\Pipe\Exceptions\ApplicationException
      */
-    public function currentBuild()
-    {
-        return $this->belongsTo(Build::class);
-    }
-
     public function release($invoker)
     {
         $build = new Build();

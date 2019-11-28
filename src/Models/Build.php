@@ -2,7 +2,11 @@
 
 namespace Fikrimi\Pipe\Models;
 
+use Carbon\Carbon;
 use Fikrimi\Pipe\Jobs\BuildProject;
+use Fikrimi\Pipe\Jobs\SwitchBuild;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
@@ -24,20 +28,20 @@ use Illuminate\Support\Str;
  * @property-read \Fikrimi\Pipe\Models\Project $project
  * @property-read \Illuminate\Database\Eloquent\Collection|\Fikrimi\Pipe\Models\Step[] $steps
  * @property-read int|null $steps_count
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build query()
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereBranch($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereErrors($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereInvoker($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereMetaProject($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereProjectId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStartedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereStoppedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Fikrimi\Pipe\Models\Build whereUpdatedAt($value)
+ * @method static Builder|Build newModelQuery()
+ * @method static Builder|Build newQuery()
+ * @method static Builder|Build query()
+ * @method static Builder|Build whereBranch($value)
+ * @method static Builder|Build whereCreatedAt($value)
+ * @method static Builder|Build whereErrors($value)
+ * @method static Builder|Build whereId($value)
+ * @method static Builder|Build whereInvoker($value)
+ * @method static Builder|Build whereMetaProject($value)
+ * @method static Builder|Build whereProjectId($value)
+ * @method static Builder|Build whereStartedAt($value)
+ * @method static Builder|Build whereStatus($value)
+ * @method static Builder|Build whereStoppedAt($value)
+ * @method static Builder|Build whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class Build extends BaseModel
@@ -48,6 +52,8 @@ class Build extends BaseModel
     public const S_FAILED = 3;
     public const S_TERMINATED = 4;
     public const S_PENDING_TERM = 5;
+    public const I_MANUAL = 'manual';
+    public const I_WEBHOOK = 'webhook';
 
     public static $statusNames = [
         self::S_PROVISIONING => 'provisioning',
@@ -56,6 +62,9 @@ class Build extends BaseModel
         self::S_FAILED       => 'failed',
         self::S_TERMINATED   => 'terminated',
         self::S_PENDING_TERM => 'pending termination',
+    ];
+    public static $invokers = [
+        self::I_MANUAL, self::I_WEBHOOK,
     ];
     public $incrementing = false;
     protected $casts = [
@@ -82,11 +91,16 @@ class Build extends BaseModel
         ];
     }
 
+    public static function switchTo(Build $build)
+    {
+        SwitchBuild::dispatch($build);
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function (\Illuminate\Database\Eloquent\Model $model) {
+        static::creating(function (Model $model) {
             $model->forceFill([
                 'id'           => Str::orderedUuid()->toString(),
                 'status'       => Build::S_PROVISIONING,
@@ -94,7 +108,7 @@ class Build extends BaseModel
             ]);
         });
 
-        static::created(function (\Illuminate\Database\Eloquent\Model $model) {
+        static::created(function (Model $model) {
             BuildProject::dispatch($model);
         });
     }
@@ -105,7 +119,7 @@ class Build extends BaseModel
             return $this->started_at->diff($this->stopped_at);
         }
 
-        return \Carbon\Carbon::now()->diff(\Carbon\Carbon::now());
+        return Carbon::now()->diff(Carbon::now());
     }
 
     public function getCacheKey($for)
@@ -130,16 +144,15 @@ class Build extends BaseModel
 
     public function checkTimeOut()
     {
-        if ($this->status === self::S_RUNNING && \Carbon\Carbon::now() > $this->started_at && $this->started_at !== null) {
+        if (
+            $this->status === self::S_RUNNING
+            && $this->started_at !== null
+            && Carbon::now() > $this->started_at->addSecond($this->meta_project['timeout'])
+        ) {
             $this->update([
                 'status'     => self::S_FAILED,
                 'stopped_at' => $this->started_at->addSeconds($this->project->timeout),
             ]);
         }
-    }
-
-    public static function switchTo(Build $build)
-    {
-        \Fikrimi\Pipe\Jobs\SwitchBuild::dispatch($build);
     }
 }
