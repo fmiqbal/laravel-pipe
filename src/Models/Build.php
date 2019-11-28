@@ -105,7 +105,7 @@ class Build extends BaseModel
             return $this->started_at->diff($this->stopped_at);
         }
 
-        return '-1';
+        return \Carbon\Carbon::now()->diff(\Carbon\Carbon::now());
     }
 
     public function getCacheKey($for)
