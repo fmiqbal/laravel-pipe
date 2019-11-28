@@ -58,7 +58,7 @@ class SwitchBuild extends Executor implements ShouldQueue
         ]);
 
         try {
-            $ssh = $this->getSSH($this->project);
+            $ssh = self::getSSH($this->project);
 
             $ssh->exec(
                 implode(' && ', $commands)

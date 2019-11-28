@@ -57,7 +57,7 @@ abstract class Executor
      * @return \phpseclib\Net\SSH2
      * @throws \Exception
      */
-    protected function getSSH(Project $project)
+    public static function getSSH(Project $project)
     {
         $ssh = new SSH2($project->host);
         $auth = Crypt::decrypt($project->credential->auth);
@@ -66,7 +66,7 @@ abstract class Executor
             $auth = (new RSA())->loadKey($auth);
         }
 
-        $ssh->setTimeout($this->project->timeout);
+        $ssh->setTimeout($project->timeout);
         $login = $ssh->login($project->credential->username, $auth);
 
         if (! $login) {
@@ -121,5 +121,4 @@ abstract class Executor
             })
             ->toArray();
     }
-
 }

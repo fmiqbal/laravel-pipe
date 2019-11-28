@@ -91,7 +91,7 @@ class BuildProject extends Executor implements ShouldQueue
         ]);
 
         try {
-            $ssh = $this->getSSH($this->project);
+            $ssh = self::getSSH($this->project);
             $this->build->update([
                 'status'     => Build::S_RUNNING,
                 'started_at' => Carbon::now(),
