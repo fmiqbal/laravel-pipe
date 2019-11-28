@@ -5,7 +5,7 @@ namespace Fikrimi\Pipe\Tests\Feature;
 use Fikrimi\Pipe\Models\Credential;
 use Fikrimi\Pipe\Tests\TestCase;
 
-class CredentialUnitTest extends TestCase
+class CredentialTest extends TestCase
 {
     public function test_that_auth_is_encrypted_when_saved()
     {

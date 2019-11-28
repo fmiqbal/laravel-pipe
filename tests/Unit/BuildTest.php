@@ -5,7 +5,7 @@ namespace Fikrimi\Pipe\Tests\Feature;
 use Fikrimi\Pipe\Models\Project;
 use Fikrimi\Pipe\Tests\TestCase;
 
-class ProjectUnitTest extends TestCase
+class BuildTest extends TestCase
 {
     public function test_id_generate_valid_uuid_when_saved()
     {
