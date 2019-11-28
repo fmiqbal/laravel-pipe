@@ -72,7 +72,7 @@ class BuildController extends BaseController
     public function destroy(Project $project, Build $build)
     {
         if (in_array($build->status, Build::getFinishStatuses())) {
-            return back();
+            return redirect()->route('pipe::projects.show', $build->project->id);
         }
 
         Cache::put(
@@ -85,6 +85,6 @@ class BuildController extends BaseController
             'status' => Build::S_PENDING_TERM,
         ]);
 
-        return back();
+        return redirect()->route('pipe::projects.show', $build->project->id);
     }
 }
