@@ -29,7 +29,6 @@ class BuildController extends BaseController
         try {
             $project->release($request->wantsJson() ? 'webhook' : 'manual');
         } catch (Exception $e) {
-            DB::rollBack();
             throw new ApplicationException($e);
         }
 
