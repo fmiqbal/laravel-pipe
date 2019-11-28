@@ -10,12 +10,19 @@
   "require": {
     "php": ">=7",
     "illuminate/support": "^6",
+    "fikrimi/laravel-helper": "dev-master",
     "laravelcollective/remote": "^6",
     "pusher/pusher-php-server": "^4.0",
     "phpseclib/phpseclib": "*",
     "ext-sodium": "*",
     "ext-json": "*"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/fikrimi23/laravel-helper"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Fikrimi\\Pipe\\": "src"

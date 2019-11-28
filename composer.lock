@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b95103240859fff12d7a826d54c4de4",
+    "content-hash": "442d914e10cee55c466ea7d72290fdc0",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -292,6 +292,50 @@
                 "parser"
             ],
             "time": "2019-03-17T18:48:37+00:00"
+        },
+        {
+            "name": "fikrimi/laravel-helper",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fikrimi23/laravel-helper.git",
+                "reference": "059ff0aa4a26db19714090cdbaa2c2f2eb6229ba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fikrimi23/laravel-helper/zipball/059ff0aa4a26db19714090cdbaa2c2f2eb6229ba",
+                "reference": "059ff0aa4a26db19714090cdbaa2c2f2eb6229ba",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.5|^6",
+                "php": ">=7"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Fikrimi\\LaravelHelper\\HelperServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Fikrimi\\LaravelHelper\\": "src"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Fikri Muhammad Iqbal",
+                    "email": "fikri.miqbal23@gmail.com"
+                }
+            ],
+            "description": "Yet Another Laravel Helper",
+            "support": {
+                "source": "https://github.com/fikrimi23/laravel-helper/tree/master",
+                "issues": "https://github.com/fikrimi23/laravel-helper/issues"
+            },
+            "time": "2019-11-27T04:54:52+00:00"
         },
         {
             "name": "laravel/framework",
@@ -5266,7 +5310,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "fikrimi/laravel-helper": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
