@@ -55,7 +55,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $build->created_at  }}</td>
                                 <td>
-                                    {{ $build->duration->format('%G:%I:%S') }}
+                                    {{ $build->duration->format('%H:%I:%S') }}
                                 </td>
                                 <td>{{ $build->invoker }}</td>
                                 <td>{{ $build->branch }}</td>
