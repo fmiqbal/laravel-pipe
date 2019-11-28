@@ -37,6 +37,13 @@ class RouteRegistrar
             'prefix'    => $prefix,
             'namespace' => '\Fikrimi\Pipe\Http\Controllers',
         ], function (Router $router) {
+
+            if (config('app.env') === 'testing') {
+                $router->get('/tests/application_exception', function () {
+                    throw new \Fikrimi\Pipe\Exceptions\ApplicationException('exception thrown');
+                });
+            }
+
             $router->get('/', function () {
                 return redirect()->route('pipe::projects.index');
             });
