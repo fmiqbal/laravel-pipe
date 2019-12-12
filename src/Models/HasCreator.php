@@ -25,12 +25,16 @@ trait HasCreator
     public function setAutoCreator($status)
     {
         $this->autoCreator = $status;
+
+        return $this;
     }
 
     public function setCreator(User $user = null)
     {
+        $user = $user ?: User::find(auth()->id());
+
         if ($user === null) {
-            $user = User::find(auth()->id());
+            return $this;
         }
 
         $this->forceFill([

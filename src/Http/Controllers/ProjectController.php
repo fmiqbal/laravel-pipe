@@ -2,7 +2,6 @@
 
 namespace Fikrimi\Pipe\Http\Controllers;
 
-use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 

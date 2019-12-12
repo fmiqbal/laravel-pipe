@@ -4,12 +4,10 @@ namespace Fikrimi\Pipe\Http\Controllers;
 
 use Exception;
 use Fikrimi\Pipe\Exceptions\ApplicationException;
-use Fikrimi\Pipe\Http\Controllers\Traits\HasPolicy;
 use Fikrimi\Pipe\Models\Build;
 use Fikrimi\Pipe\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class BuildController extends BaseController
 {

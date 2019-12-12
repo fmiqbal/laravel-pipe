@@ -35,9 +35,4 @@ class CredentialTest extends TestCase
 
         $this->assertRegExp($UUIDv4, $credData->fingerprint);
     }
-
-    public function test_duplicate_credential_shouldnt_exists()
-    {
-        $this->assertTrue(false);
-    }
 }

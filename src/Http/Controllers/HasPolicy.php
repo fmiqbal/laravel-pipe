@@ -1,6 +1,6 @@
 <?php
 
-namespace Fikrimi\Pipe\Http\Controllers\Traits;
+namespace Fikrimi\Pipe\Http\Controllers;
 
 use Illuminate\Contracts\Auth\Access\Gate;
 
